@@ -5,7 +5,7 @@
     var selectedDriverId = lstDriverName.options[lstDriverName.selectedIndex].value;
 
     if (selectedDriverId != null && selectedDriverId != '') {
-        $.getJSON("/YBORecord/GetDriverLicenseByDriverId", { driverPkId: selectedDriverId }, function (driverLicense) {
+        $.getJSON("/YBOInvestigate/YBORecord/GetDriverLicenseByDriverId", { driverPkId: selectedDriverId }, function (driverLicense) {
             driverLicenseTestBox.val(driverLicense);
         });
     }
@@ -30,7 +30,7 @@ function FillDriverInfoByDriverId(lstDriverName) {
     var selectedDriverId = lstDriverName.options[lstDriverName.selectedIndex].value;
 
     if (selectedDriverId != null && selectedDriverId != '') {
-        $.getJSON("/YBSDriverCourseDelivery/GetDriverInfoByDriverId", { driverPkId: selectedDriverId }, function (data) {
+        $.getJSON("/YBOInvestigate/YBSDriverCourseDelivery/GetDriverInfoByDriverId", { driverPkId: selectedDriverId }, function (data) {
             var license = data.license;
             var trainedDriverInfo = data.trainedDriverInfo;
 

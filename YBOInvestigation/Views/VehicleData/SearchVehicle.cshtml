@@ -49,6 +49,13 @@
         }
     </div>
 </div>
+@if(ViewBag.AutoComplete.Count < 1)
+{
+    <span class="text-danger"><i class="fas fa-exclamation-triangle"></i>မော်တော်ယာဥ်နှင့်သက်ဆိုင်သောဒေတာများမရှိသေးပါ။</span>
+    <span class="text-danger">Transportation Departmentကိုဆက်သွယ်၍မော်တော်ယာဥ်အချက်အလက်များကိုဦးစွာဖြည့်သွင်းပါ။</span>
+}
+else
+{
 @if (Model != null && Model.Any())
 {
 @foreach (var item in Model)
@@ -130,4 +137,5 @@ else
         <img class="image-fluid" src="~/image/search-vehicle.jpg" style="height: 300px;width: 1000px;">
     </div>    
     }
+}
 }

@@ -139,24 +139,25 @@ namespace YBOInvestigation.Services.Impl
                 string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
                 yBSDriverCourseDelivery.DriverName = oldDriverName;
             }
-            Driver existingDriver = _driverService.FindDriverByLicense(yBSDriverCourseDelivery.DriverLicense);
-            
-            if (existingDriver == null)
+            TrainedYBSDriverInfo trainedDriverInfo = new TrainedYBSDriverInfo
             {
+                Age = yBSDriverCourseDelivery.Age,
+                FatherName = yBSDriverCourseDelivery.FatherName,
+                Address = yBSDriverCourseDelivery.Address,
+                EducationLevel = yBSDriverCourseDelivery.EducationLevel,
+                Phone = yBSDriverCourseDelivery.Phone
+            };
+
+            Driver existingDriver = _driverService.FindDriverByLicense(yBSDriverCourseDelivery.DriverLicense);
+            if (existingDriver == null)
+            { 
                 VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yBSDriverCourseDelivery.VehicleNumber);
                 Driver driver = new Driver
                 {
                     DriverName = yBSDriverCourseDelivery.DriverName,
                     DriverLicense = yBSDriverCourseDelivery.DriverLicense,
                 };
-                TrainedYBSDriverInfo trainedDriverInfo = new TrainedYBSDriverInfo
-                {
-                    Age = yBSDriverCourseDelivery.Age,
-                    FatherName = yBSDriverCourseDelivery.FatherName,
-                    Address = yBSDriverCourseDelivery.Address,
-                    EducationLevel = yBSDriverCourseDelivery.EducationLevel,
-                    Phone = yBSDriverCourseDelivery.Phone
-                };
+                
                 driver.VehicleData = vehicleData;
                 _driverService.CreateDriver(driver);
                 trainedDriverInfo.Driver = driver;
@@ -169,17 +170,28 @@ namespace YBOInvestigation.Services.Impl
             {
                 existingDriver.DriverName = yBSDriverCourseDelivery.DriverName;
                 existingDriver.DriverLicense = yBSDriverCourseDelivery.DriverLicense;
-                TrainedYBSDriverInfo existingTrainedDriverInfo = _trainedDriverInfoService.GetTrainedYBSDriverInfoByDriverId(existingDriver.DriverPkid);
-                existingTrainedDriverInfo.Age = yBSDriverCourseDelivery.Age;
-                existingTrainedDriverInfo.FatherName = yBSDriverCourseDelivery.FatherName;
-                existingTrainedDriverInfo.Address = yBSDriverCourseDelivery.Address;
-                existingTrainedDriverInfo.EducationLevel = yBSDriverCourseDelivery.EducationLevel;
-                existingTrainedDriverInfo.Phone = yBSDriverCourseDelivery.Phone;
-                //existingDriver.VehicleNumber = yBSDriverCourseDelivery.VehicleNumber;
                 _driverService.EditDriver(existingDriver);
-                _trainedDriverInfoService.EditTrainedYBSDriverInfo(existingTrainedDriverInfo);
-                yBSDriverCourseDelivery.TrainedYBSDriverInfo = existingTrainedDriverInfo;
-                return Update(yBSDriverCourseDelivery);
+
+                TrainedYBSDriverInfo existingTrainedDriverInfo = _trainedDriverInfoService.GetTrainedYBSDriverInfoByDriverId(existingDriver.DriverPkid);
+                if (existingTrainedDriverInfo == null)
+                {
+                    trainedDriverInfo.Driver = existingDriver;
+                    _trainedDriverInfoService.CreateTrainedYBSDriverInfo(trainedDriverInfo);
+                    yBSDriverCourseDelivery.TrainedYBSDriverInfo = trainedDriverInfo;
+                    return Update(yBSDriverCourseDelivery);
+                }
+                else
+                {
+                    existingTrainedDriverInfo.Age = yBSDriverCourseDelivery.Age;
+                    existingTrainedDriverInfo.Address = yBSDriverCourseDelivery.Address;
+                    existingTrainedDriverInfo.Phone = yBSDriverCourseDelivery.Phone;
+                    existingTrainedDriverInfo.FatherName = yBSDriverCourseDelivery.FatherName;
+                    existingTrainedDriverInfo.EducationLevel = yBSDriverCourseDelivery.EducationLevel;
+                    yBSDriverCourseDelivery.TrainedYBSDriverInfo = existingTrainedDriverInfo;
+                    _trainedDriverInfoService.EditTrainedYBSDriverInfo(existingTrainedDriverInfo);
+                    yBSDriverCourseDelivery.TrainedYBSDriverInfo = existingTrainedDriverInfo;
+                    return Update(yBSDriverCourseDelivery);
+                }
             }
 
         }

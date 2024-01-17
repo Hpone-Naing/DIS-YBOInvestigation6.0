@@ -1,6 +1,6 @@
 ﻿namespace YBOInvestigation.Models
 {
-    [Table("TB_PunishmentType")]
+    [Table("TB_DriverPunishmentType")]
     public class PunishmentType
     {
         [Key]
