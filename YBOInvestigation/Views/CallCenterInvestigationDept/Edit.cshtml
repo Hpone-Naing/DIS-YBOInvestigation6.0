@@ -1,0 +1,165 @@
+﻿@model YBOInvestigation.Models.CallCenterInvestigationDept
+
+@{
+    Layout = "_Layout";
+}
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<div id="spinner-container">
+    <img id="spinner" decoding="async" src="~/image/loading/spinner.gif" asp-append-version="true" />
+</div>
+
+<div class="d-flex justify-content-center align-item-center pb-4">
+    <label class="text-primary h4">  စည်းကမ်းထိန်းသိမ်းရေးနှင့် စစ်ဆေးရေးငှာန (Call Center)</label>
+</div>
+@if (TempData.ContainsKey("Message") && TempData.ContainsKey("CssColor"))
+{
+    <div class="alert @TempData["CssColor"]"> @TempData["Message"] </div>
+}
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> Call Center တိုင်ကြားမှုမှတ်တမ်း </label>
+    </div>
+</div>
+
+<form id="form" asp-action="Edit">
+    <div class="row mt-1 border border-dark">
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <input type="hidden" asp-for="CallCenterInvestigationDeptPkid" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mt-2">
+                <label asp-for="RecordDate" class="control-label"></label>
+                <input asp-for="RecordDate" class="form-control" required />
+                <span asp-validation-for="RecordDate" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="VehicleNumber" class="control-label"></label>
+                <input asp-for="VehicleNumber" class="form-control" value="@ViewBag.VehicleNumber" readonly />
+                <span asp-validation-for="VehicleNumber" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mt-2">
+                <label asp-for="DriverName" class="control-label"></label>
+                <div class="row">
+                    <div id="lstDriverNameDiv" class="col-10" style="display:none;">
+                        <select list="datas" id="lstDriverName" name="selectedDriverName" class="form-control" onchange="FillDriverLicenseByDriverId(this, 'driverLicense');" required>
+                            <option value="" selected>ရွေးချယ်ပါ</option>
+                            @foreach (var i in ViewBag.AutoComplete)
+                            {
+                                <option value="@i.DriverPkId">@i.DriverName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="DriverName" class="text-danger"></span>
+
+                    </div>
+                    <div id="newDriverDiv" class="col-10">
+                        <input id="newDriverName" class="form-control" name="newDriverName" value="@Model.Driver.DriverName" />
+                    </div>
+                    <div id="remove" class="col" style="cursor:pointer;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div id="add" class="col" style="cursor:pointer;display:none;">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                </div>
+                <span asp-validation-for="DriverName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-2">
+                <label asp-for="YBSCompanyPkid" class="control-label"></label>
+                <input type="hidden" asp-for="YBSCompanyPkid" value="@ViewBag.YBSCompany.YBSCompanyPkid" />
+                <input asp-for="YBSCompanyPkid" type="text" class="form-control" value="@ViewBag.YBSCompany.YBSCompanyName" readonly />
+                @*<select id="lstYBSCompanyId" asp-for="YBSCompanyPkid" class="form-control" asp-items="ViewBag.YBSCompanies" onchange="FillYBSTypesByYBSCompany(this, 'lstYBSTypeId');" required></select>*@
+                <span asp-validation-for="YBSCompanyPkid" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="YBSTypePkid" class="control-label"></label>
+                <input type="hidden" asp-for="YBSTypePkid" value="@ViewBag.YBSType.YBSTypePkid"/>
+                <input asp-for="YBSTypePkid" type="text" class="form-control" value="@ViewBag.YBSType.YBSTypeName" readonly />
+                @*<select id="lstYBSTypeId" asp-for="YBSTypePkid" class="form-control" asp-items="ViewBag.YBSTypes" required></select>*@
+                <span asp-validation-for="YBSTypePkid" class="text-danger"></span>
+            </div>
+
+            @*<div class="form-group mt-2">
+                <label asp-for="YBSCompanyPkid" class="control-label"></label>
+                <select id="lstYBSCompanyId" asp-for="YBSCompanyPkid" class="form-control" asp-items="ViewBag.YBSCompanies" onchange="FillYBSTypesByYBSCompany(this, 'lstYBSTypeId');" required></select>
+                <span asp-validation-for="YBSCompanyPkid" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-2">
+                <label asp-for="YBSTypePkid" class="control-label"></label>
+                <select id="lstYBSTypeId" asp-for="YBSTypePkid" class="form-control" asp-items="ViewBag.YBSTypes" required></select>
+                <span asp-validation-for="YBSTypePkid" class="text-danger"></span>
+            </div>*@
+            
+            <div class="form-group mt-2">
+                <label asp-for="TotalRecord" class="control-label"></label>
+                <input asp-for="TotalRecord" class="form-control" required />
+                <span asp-validation-for="TotalRecord" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="IDNumber" class="control-label"></label>
+                <input asp-for="IDNumber" class="form-control" required />
+                <span asp-validation-for="IDNumber" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="form-group mt-2">
+                <label asp-for="RecordTime" class="control-label"></label>
+                <input asp-for="RecordTime" class="form-control" required />
+                <span asp-validation-for="RecordTime" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="YbsRecordSender" class="control-label"></label>
+                <input asp-for="YbsRecordSender" class="form-control" required/>
+                <span asp-validation-for="YbsRecordSender" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" required />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="CompletionStatus" class="control-label"></label>
+                <select asp-for="CompletionStatus" class="form-control" required>
+                    <option value="" selected>ရွေးချယ်ရန်</option>
+                    <option value="Complete">ပြီးဆုံး</option>
+                    <option value="No">မရှိ</option>
+                    <option value="InProgress">ဆောင်ရွက်ဆဲ</option>
+                </select>
+                <span asp-validation-for="CompletionStatus" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mt-2">
+                <label asp-for="CompletedDate" class="control-label"></label>
+                <input asp-for="CompletedDate" class="form-control" required />
+                <span asp-validation-for="CompletedDate" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mt-2">
+                <label asp-for="DriverLicense" class="control-label"></label>
+                <input id="driverLicense" asp-for="DriverLicense" class="form-control" value="@Model.Driver.DriverLicense" />
+                <span asp-validation-for="DriverLicense" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group mt-2">
+            <label asp-for="RecordDescription" class="control-label"></label>
+            <textarea asp-for="RecordDescription" class="form-control" required></textarea>
+            <span asp-validation-for="RecordDescription" class="text-danger"></span>
+        </div>
+        <div class="d-flex justify-content-center align-item-center mt-3 mb-2">
+            <input type="submit" value="Edit" class="btn btn-primary" />
+        </div>
+    </div>
+</form>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

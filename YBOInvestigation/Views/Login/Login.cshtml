@@ -1,0 +1,137 @@
+﻿@model YBOInvestigation.Models.User
+
+@{
+    Layout = null;
+}
+<html lang="en"
+      class="light-style customizer-hide"
+      dir="ltr"
+      data-theme="theme-default"
+      data-template="vertical-menu-template-free">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>YRTC</title>
+    <link rel="icon" href="~/Content/images/MADB Logo.png" type="image/png">
+
+    <meta name="description" content="" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/js/bootstrap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="~/LoginFormStyle/boxicons.css" />
+    <link rel="stylesheet" href="~/LoginFormStyle/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="~/LoginFormStyle/theme-default.css" class="template-customizer-theme-css" />
+
+    <link rel="stylesheet" href="~/LoginFormStyle/page-auth.css" />
+    <script src="~/LoginFormStyle/js/helpers.js"></script>
+    <script src="~/LoginFormStyle/js/config.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+<body>
+<div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+            <!-- Register -->
+            <div class="card">
+                <div class="card-body">
+                    @if (TempData.ContainsKey("Message") && TempData.ContainsKey("CssColor"))
+                    {
+                          <div class="alert @TempData["CssColor"]"> @TempData["Message"] </div>
+                    }
+                    <div class="d-flex justify-content-center align-item-center">
+                         <h4>Welcome To</h4>
+                    </div>
+                    <!-- Logo -->
+                        <div class="justify-content-center">
+                            <a asp-controller="Login" asp-action="Index" class="app-brand-link gap-2">
+                                <span class="app-brand-text demo text-body fw-bolder">Yangon Region Private Transport Committee</span>
+                            </a>
+                        </div>
+                    <div class="app-brand justify-content-center">
+                        <a asp-controller="Login" asp-action="Index" class="app-brand-link gap-2">
+                            <span class="app-brand-logo demo">
+                                    <img src="~/Content/images/MADBIMG.png" width="70px;" />
+                            </span>
+                        </a>
+                    </div>
+                    <!-- /Logo -->
+                    @{
+                            bool rememberMe = ViewBag.IsRememberMe ?? false;
+                        }
+                     @if (rememberMe)
+                     {
+                            <p class="mb-4">Tab picture to Login</p>
+                            <div class="app-brand justify-content-center">
+                                <a asp-controller="VehicleData" asp-action="List" class="app-brand-link gap-2">
+                                    <span class="app-brand-logo demo">
+                                        <img src="~/Content/images/MADBIMG.png" class="img-thumbnail" width="100px"/>
+                                    </span>
+                                </a>
+                            </div>
+                            <div>
+                                 <a class="btn btn-outline-primary d-flex justify-content-center align-item-center" asp-controller="Login" asp-action="RemoveOneTapLogin">Remove one tap Login</a>
+                            </div>
+                     }
+                     else
+                     {
+                    <p class="mb-4">Please sign-in to your account</p>
+
+                            <form id="formAuthentication" class="mb-3" asp-action="Login" method="post">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">UserId or Username</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           asp-for="UserID"
+                                           autofocus />
+                                </div>
+                                <div class="mb-3 form-password-toggle">
+                                    <div class="d-flex justify-content-between">
+                                        <label class="form-label" for="password">Password</label>
+                                        @*<a href="auth-forgot-password-basic.html">
+                                            <small>Forgot Password?</small>
+                                    </a>*@
+                                    </div>
+                                    <div class="input-group input-group-merge">
+                                        <input type="password"
+                                               id="password"
+                                               class="form-control"
+                                               asp-for="Password"
+                                               placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                               aria-describedby="password" />
+                                        <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="RememberMe" value="true"/>
+                                        <label class="form-check-label" for="remember-me"> Remember Me </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                                </div>
+                            </form>
+                        }
+                    @*<p class="text-center">
+                        <span>New on our platform?</span>
+                        <a href="#" style="cursor:none">
+                            <span>Create an account</span>
+                        </a>
+                        </p>*@
+                </div>
+            </div>
+            <!-- /Register -->
+        </div>
+    </div>
+</div>
+    <script src="~/Content/bower_components/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/LoginFormStyle/js/main.js"></script>
+</body>
+</html>
+
+
+

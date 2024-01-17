@@ -1,0 +1,171 @@
+﻿@model YBOInvestigation.Models.VehicleData
+
+@{
+    Layout = "_Layout";
+}
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div id="spinner-container">
+    <img id="spinner" decoding="async" src="~/image/loading/spinner.gif" asp-append-version="true" />
+</div>
+
+<div class="d-flex justify-content-center align-item-center pb-4">
+    <label class="text-primary h4"> မောင်တော်ယာဥ်အချက်အလက်စာရင်းအသေးစိတ်ကြည့်ရန်</label>
+</div>
+
+<div class="d-flex justify-content-end align-item-end">
+    <div class="dropdown">
+        <button type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" class="btn btn-danger dropdown-toggle rounded-pill">တိုင်ကြားမည်</button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate(-55px, 39px);" data-popper-placement="bottom-end">
+            <li><a class="dropdown-item" asp-controller="YBORecord" asp-action="Create" asp-route-vehicleId="@Model.VehicleDataPkid">စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာန</a></li>
+            <li><a class="dropdown-item" asp-controller="CallCenterInvestigationDept" asp-action="Create" asp-route-vehicleId="@Model.VehicleDataPkid">Call Center တိုင်ကြားမှုမှတ်တမ်း</a></li>
+            <li><a class="dropdown-item" asp-controller="YBOInvestigationDept" asp-action="Create" asp-route-vehicleId="@Model.VehicleDataPkid">စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာန(YBO)</a></li>
+            <li><a class="dropdown-item" asp-controller="TrafficControlCenterInvestigationDept" asp-action="Create" asp-route-vehicleId="@Model.VehicleDataPkid">စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာန(Traffic Control Center)</a></li>
+            <li><a class="dropdown-item" asp-controller="SpecialEventInvestigationDept" asp-action="Create" asp-route-vehicleId="@Model.VehicleDataPkid">စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာန(ထူးခြားဖြစ်စဥ်)</a></li>
+            <li><a class="dropdown-item" asp-controller="YBSDriverCourseDelivery" asp-action="Create" asp-route-vehicleId="@Model.VehicleDataPkid">YBSယာဥ်မောင်းအား သင်တန်းပေးမှု</a></li>
+        </ul>
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-2 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> မော်တော်ယာဥ်အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+
+<div class="row mt-1 border border-dark">
+    <div class="col-lg-6 col-md-6 col-sm-12">
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="SerialNo" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.SerialNo
+            </div>
+        </div>
+        <div class="row p-2">
+            <label asp-for="YBSName" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.YBSName
+            </div>
+        </div>
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="VehicleNumber" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.VehicleNumber
+            </div>
+        </div>
+        <div class="row p-2">
+            <label asp-for="ManufacturedYear" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.ManufacturedYear
+            </div>
+        </div>
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="CngQty" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.CngQty
+            </div>
+        </div>
+        <div class="row p-2">
+            <label asp-for="CctvInstalled" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.CctvInstalled
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="TelematicDeviceInstalled" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.TelematicDeviceInstalled
+            </div>
+        </div>
+        <div class="row p-2">
+            <label asp-for="TotalBusStop" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.TotalBusStop
+            </div>
+        </div>
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="POSInstalled" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.POSInstalled
+            </div>
+        </div>
+        <div class="row p-2">
+            <label asp-for="RegistrationDate" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.RegistrationDate
+            </div>
+        </div>
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="AssignedRoute" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.AssignedRoute
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="row p-2">
+            <label asp-for="Remarks" class="fw-bold col-lg-2 col-md-2 col-sm-4 control-label"></label>
+            <div class="col-lg-10 col-md-10 col-sm-8">
+                @Model.Remarks
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> YBS Company အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="YBSCompany" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.YBSCompany.YBSCompanyName
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> ယာဥ်အမျိုးအမည် အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="YBSType" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.YBSType.YBSTypeName
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> ာယာဥ်အမျိုးအစား အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="Manufacturer" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.Manufacturer.ManufacturerName
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> စက်သုံးဆီ အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for= "FuelType" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.FuelType.FuelTypeName
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

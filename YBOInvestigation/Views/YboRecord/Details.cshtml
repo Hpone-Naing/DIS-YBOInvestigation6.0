@@ -1,0 +1,121 @@
+﻿@model YBOInvestigation.Models.YboRecord
+
+@{
+    Layout = "_Layout";
+}
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div id="spinner-container">
+    <img id="spinner" decoding="async" src="~/image/loading/spinner.gif" asp-append-version="true" />
+</div>
+
+<div class="d-flex justify-content-center align-item-center pb-4">
+    <label class="text-primary h4"> YBO ဖမ်းစီးမှုမှတ်တမ်းအချက်အလက်စာရင်းအသေးစိတ်ကြည့်ရန်</label>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> YBO ဖမ်းစီးမှုမှတ်တမ်းအချက်အလက်စာရင်း </label>
+    </div>
+</div>
+
+<div class="row mt-1 border border-dark">
+    <div class="col-lg-6 col-md-6 col-sm-12">
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="RecordDate" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.RecordDate
+            </div>
+        </div>
+        <div class="row p-2">
+            <label asp-for="TotalRecord" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.TotalRecord
+            </div>
+        </div>
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="CompletionStatus" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.CompletionStatus
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12">
+        <div class="row p-2" style="background-color: #c0c0c052;">
+            <label asp-for="ChallanNumber" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.ChallanNumber
+            </div>
+        </div>
+        <div class="row p-2">
+            <label asp-for="YbsRecordSender" class="fw-bold col-lg-6 col-md-6 col-sm-4 control-label"></label>
+            <div class="col-lg-6 col-md-6 col-sm-8">
+                @Model.YbsRecordSender
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="row p-2">
+            <label asp-for="RecordDescription" class="fw-bold col-lg-2 col-md-2 col-sm-4 control-label"></label>
+            <div class="col-lg-10 col-md-10 col-sm-8">
+                @Model.RecordDescription
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> YBS Company အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="YBSCompany" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.YBSCompany.YBSCompanyName
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> ယာဥ်အမျိုးအမည် အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="YBSType" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.YBSType.YBSTypeName
+    </div>
+</div>
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> ယာဥ်မောင်း အချက်အလက်စာရင်း </label>
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="Driver.DriverName" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.Driver.DriverName
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="Driver.DriverLicense" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.Driver.DriverLicense
+    </div>
+</div>
+<div class="row mt-1 border border-dark p-2">
+    <label asp-for="@Model.Driver.VehicleData.VehicleNumber" class="fw-bold col-lg-3 col-md-3 col-sm-4 control-label"></label>
+    <div class="col-lg-6 col-md-6 col-sm-8">
+        @Model.Driver.VehicleData.VehicleNumber
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }

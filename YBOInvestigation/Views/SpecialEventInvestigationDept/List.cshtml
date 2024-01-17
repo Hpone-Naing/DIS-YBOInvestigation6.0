@@ -1,0 +1,180 @@
+﻿@inject IConfiguration Configuration
+@model YBOInvestigation.Paging.PagingList<YBOInvestigation.Models.SpecialEventInvestigationDept>
+@{
+    ViewData["Title"] = "List";
+}
+
+<div id="spinner-container">
+    <img id="spinner" decoding="async" src="~/image/loading/spinner.gif" asp-append-version="true" />
+</div>
+
+<div class="d-flex justify-content-center align-item-center pb-4">
+    <label class="text-primary h4"> စည်းကမ်းထိန်းသိမ်းရေးနှင့် စစ်ဆေးရေးငှာန (ထူးခြားဖြစ်စဥ်)</label>
+</div>
+@if (TempData.ContainsKey("Message") && TempData.ContainsKey("CssColor"))
+{
+    <div class="alert @TempData["CssColor"]"> @TempData["Message"] </div>
+}
+
+
+<div style="background-color: #e1e135ed;" class="row mt-3 border border-dark">
+
+    <div class="d-flex justify-content-center align-item-center p-1">
+        <label class="text-black"> ထူးခြားဖြစ်စဥ်တိုင်ကြားမှုအချက်အလက်များ </label>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col">
+        <form class="input-group" method="get" action="@Url.Action("List", "SpecialEventInvestigationDept")">
+            <div class="col-8">
+                <input type="text" class="form-control" name="SearchString" placeholder="[Enter Keywords to Search]" style="border-radius:50px;border-color: #423535d4;">
+            </div>
+            @*<div class="input-group-append">
+                <button type="submit" class="btn btn-primary btn-md"><i class="fa fa-search"></i></button>
+            </div>*@
+        </form>
+    </div>
+</div>
+
+    @*<div class="col-4 col-sm-4 col-md-4 advance-search-btn">
+        <input class="btn btn-primary btn-md" type="button" data-bs-toggle="modal" data-bs-target="#advanceSearchModel" value="Advance Search" />
+    </div>
+
+    <div class="col-1 col-sm-1 col-md-1 mt-1 advance-search-btn-swl-510 justify-content-center align-self-center me-2">
+        <i class="fa fa-solid fa-magnifying-glass-plus me-3 fa-xl" data-bs-toggle="modal" data-bs-target="#advanceSearchModel" style="color: #367fa9;/*! width: 300px; *//*! height: 300px; */" class="fa fa-solid fa-magnifying-glass-plus advance-search-btn-swl-510 me-3 fa-xl"></i>
+    </div>
+</div>*@
+
+<div class="d-flex bd-highlight mt-4">
+    <form method="get" action="@Url.Action("List", "SpecialEventInvestigationDept")">
+        <input type="hidden" name="export" value="excel">
+        <input type="hidden" name="SearchString" value="@ViewBag.SearchString">
+        <input type="hidden" name="pageNo" asp-for="@(Model.PageIndex)">
+        <div class="p-2 bd-highlight">
+            All
+            <input class="form-check-input" type="checkbox" value="true" name="ExportAll">
+            <button id="exportButton" type="submit" class="btn btn-outline-primary" data-toggle="tooltip" data-placement="top" title="Export Excel File"><i class="far fa-file-excel fa-lg"></i></button>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive mt-2">
+    <table class="table table-bordered  table-striped">
+        <thead style="background-color: #3e81aa;">
+            <tr>
+                <th class="text-white">
+                    စဥ်
+                </th>
+                <th class="text-white">
+                    ဖြစ်ပွားရက်စွဲ
+                </th>
+                <th class ="text-white">
+                    ဖြစ်ပွားသည့်အချိန်
+                </th>
+
+                <th class="text-white">
+                    ဖြစ်ပွားသည့်နေရာ
+                </th>
+                <th class="text-white">
+                    ယာဥ်အမှတ်
+                </th>
+                <th class="text-white">လုပ်ဆောက်ချက်များ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i=0;
+            }
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @{
+                            i++;
+                        }
+                        @i
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IncidenceDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IncidenceTime)
+                    </td>
+                    
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IncidencePlace)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.VehicleNumber)
+                    </td>
+                    <td>
+                        <a  class="btn btn-outline link" data-toggle="tooltip" data-placement="top" title="Edit" asp-action="Edit" asp-route-id="@item.SpecialEventInvestigationDeptDeptPkid"><i class="fa fa-duotone fa-pencil fa-lg" style="color:black"></i></a>|
+                        <a class="btn btn-outline link" data-toggle="tooltip" data-placement="top" title="Detail" asp-action="Details" asp-route-id="@item.SpecialEventInvestigationDeptDeptPkid"><i class="fa fa-info-circle fa-lg text-primary"></i></a> |
+                        <button class="btn btn-outline" type="button" data-toggle="tooltip" data-placement="top" title="Delete" data-bs-toggle="modal" data-bs-target=" @("#deleteModel" + @item.SpecialEventInvestigationDeptDeptPkid)"><i class="fas fa-regular fa-trash fa-lg text-danger"></i></button>
+                    </td>
+                </tr>
+                <!-- Delete Modal -->
+                <div class="modal fade" id="@("deleteModel" + @item.SpecialEventInvestigationDeptDeptPkid)" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div id="spinner-container">
+                            <img id="spinner" decoding="async" src="~/image/loading/spinner.gif" asp-append-version="true" />
+                        </div>
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure want to delete this YBO Record?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                    Close
+                                </button>
+                                <form id="form" asp-action="Delete">
+                                    <input type="hidden" name="Id" asp-for="@item.SpecialEventInvestigationDeptDeptPkid" />
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--/ Delete Modal -->
+            }
+        </tbody>
+    </table>
+
+    <br />
+@if (Model != null && Model.Any())
+{
+        var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+        var totalPageNo = Model.TotalPageNo;
+        var currentPageNo = Model.PageIndex;
+        var searchString = ViewBag.SearchString ?? null;
+ 
+    <a asp-action="List"
+           asp-route-pageNo="@(Model.PageIndex - 1)"
+           asp-route-SearchString="@searchString"
+       class="link btn btn-primary btn-sm @prevDisabled">
+        Previous
+    </a>
+    <a asp-action="List"
+           asp-route-pageNo="@(Model.PageIndex + 1)"
+           asp-route-SearchString="@searchString"
+    class="link btn btn-primary btn-sm @nextDisabled">
+        Next
+    </a>
+    <span>
+        Page No : @currentPageNo of @totalPageNo
+    </span>
+}
+else
+{
+            <span>No data available</span>
+        <a asp-controller="SpecialEventInvestigationDept" asp-action="List" class="fas far fa-sync fa-xl"></a>
+}
+
+</div>
+
