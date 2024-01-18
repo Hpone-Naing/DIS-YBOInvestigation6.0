@@ -26,7 +26,7 @@
 
 <div class="row mt-3">
     <div class="col">
-        <form class="input-group" method="get" action="@Url.Action("List", "YBORecord")">
+        <form class="input-group" method="get" action="@Url.Action("List", "YBSDriverCourseDelivery")">
             <div class="col-8">
                 <input type="text" class="form-control" name="SearchString" placeholder="[Enter Keywords to Search]" style="border-radius:50px;border-color: #423535d4;">
             </div>
@@ -47,7 +47,7 @@
 </div>*@
 
 <div class="d-flex bd-highlight mt-4">
-    <form method="get" action="@Url.Action("List", "YBORecord")">
+    <form method="get" action="@Url.Action("List", "YBSDriverCourseDelivery")">
         <input type="hidden" name="export" value="excel">
         <input type="hidden" name="SearchString" value="@ViewBag.SearchString">
         <input type="hidden" name="pageNo" asp-for="@(Model.PageIndex)">
@@ -173,7 +173,7 @@
 else
 {
             <span>No data available</span>
-            <a asp-controller="YBORecord" asp-action="List" class="fas far fa-sync fa-xl"></a>
+        <a asp-controller="YBSDriverCourseDelivery" asp-action="List" class="fas far fa-sync fa-xl"></a>
 }
 
 </div>
