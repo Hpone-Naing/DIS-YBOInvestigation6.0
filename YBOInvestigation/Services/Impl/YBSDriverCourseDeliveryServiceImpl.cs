@@ -35,13 +35,13 @@ namespace YBOInvestigation.Services.Impl
 
         public PagingList<YBSDriverCourseDelivery> GetAllYBSDriverCourseDeliveriesWithPagin(string searchString, int? pageNo, int PageSize)
         {
-            List<YBSDriverCourseDelivery> yBSDriverCourseDeliverys = GetAllYBSDriverCourseDeliveries();
             List<YBSDriverCourseDelivery> resultList = new List<YBSDriverCourseDelivery>();
             if (searchString != null && !String.IsNullOrEmpty(searchString))
             {
                 resultList = _context.YBSDriverCourseDeliveries
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSCompany)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSType)
+                            .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.PunishmentType)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData)
@@ -49,6 +49,7 @@ namespace YBOInvestigation.Services.Impl
                             .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.IsDeleted == false)
                             .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSCompany.IsDeleted == false)
                             .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSType.IsDeleted == false)
+                            .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.PunishmentType.IsDeleted == false)
 
                             .Where(yBSDriverCourseDelivery => IsSearchDataContained(yBSDriverCourseDelivery, searchString)
                             || IsSearchDataContained(yBSDriverCourseDelivery.YBSCompany, searchString)
@@ -56,6 +57,7 @@ namespace YBOInvestigation.Services.Impl
                             || IsSearchDataContained(yBSDriverCourseDelivery.TrainedYBSDriverInfo, searchString)
                             || IsSearchDataContained(yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver, searchString)
                             || IsSearchDataContained(yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData, searchString)
+                            || IsSearchDataContained(yBSDriverCourseDelivery.PunishmentType, searchString)
                             ).AsQueryable().ToList();
             }
             else
@@ -64,6 +66,7 @@ namespace YBOInvestigation.Services.Impl
                     .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.IsDeleted == false)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSCompany)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSType)
+                            .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.PunishmentType)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData)
