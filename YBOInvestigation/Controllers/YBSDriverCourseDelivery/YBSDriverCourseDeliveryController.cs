@@ -104,11 +104,18 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
+            try
+            { 
             AddViewBag(vehicleId);
-
             return View();
         }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view create page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
+
+}
 
 
         [ValidateAntiForgeryToken, HttpPost]
@@ -120,51 +127,61 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             ybsDriverCourseDelivery.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
-            if (_serviceFactory.CreateYBSDriverCourseDeliveryService().CreateYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
-            {
-                Utility.AlertMessage(this, "Save Success", "alert-success");
-                try
+            try
+            { 
+                if (_serviceFactory.CreateYBSDriverCourseDeliveryService().CreateYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
                 {
+                    Utility.AlertMessage(this, "Save Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Save Fail. Server Error encounter.", "alert-danger");
                     return RedirectToAction(nameof(List));
                 }
-                catch (NullReferenceException ne)
-                {
-                    Utility.AlertMessage(this, "Data Issue. Please fill YBSDriverCourseDeliveries in database", "alert-danger");
-                    AddViewBag();
-                    return View();
-                }
-                catch (SqlException se)
-                {
-                    Utility.AlertMessage(this, "Internal Server Error", "alert-danger");
-                    AddViewBag();
-                    return View();
-                }
             }
-            else
+            catch (Exception e)
             {
-                Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
-                AddViewBag();
-                return View();
+                Utility.AlertMessage(this, "Save Fail. Server Error encounter.", "alert-danger");
+                return RedirectToAction(nameof(List));
             }
         }
 
         public IActionResult Edit(int Id)
         {
+            
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
+            try
+            {
+                YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
             AddViewBag(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
             return View(ybsDriverCourseDelivery);
         }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
+}
 
         public IActionResult Details(int Id)
         {
+            
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
+            try
+            {
+                YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
             return View(ybsDriverCourseDelivery);
         }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
+}
 
         [ValidateAntiForgeryToken]
         [HttpPost]
@@ -175,18 +192,29 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             ybsDriverCourseDelivery.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
-            
-            if (_serviceFactory.CreateYBSDriverCourseDeliveryService().EditYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
+            try
             {
+                if (_serviceFactory.CreateYBSDriverCourseDeliveryService().EditYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
+                {
 
-                Utility.AlertMessage(this, "Edit Success", "alert-success");
-                return RedirectToAction(nameof(List));
-            }
-            else
-            {
+                    Utility.AlertMessage(this, "Edit Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    YBSDriverCourseDelivery oldYbsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid);
+                    AddViewBag(oldYbsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
+                    
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
-                YBSDriverCourseDelivery record = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid);
-                return View(record);
+                    return View(oldYbsDriverCourseDelivery);
+                }
+            }
+            catch (Exception e)
+            {
+                YBSDriverCourseDelivery oldYbsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid);
+                AddViewBag(oldYbsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
+                Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                return View(oldYbsDriverCourseDelivery);
             }
         }
 
@@ -197,14 +225,21 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesById(Id);
-            if (_serviceFactory.CreateYBSDriverCourseDeliveryService().DeleteYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
+            try
             {
-                Utility.AlertMessage(this, "Delete Success", "alert-success");
-                return RedirectToAction(nameof(List));
+                YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesById(Id);
+                if (_serviceFactory.CreateYBSDriverCourseDeliveryService().DeleteYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
+                {
+                    Utility.AlertMessage(this, "Delete Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
+                }
             }
-            else
+            catch (Exception e)
             {
                 Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
                 return RedirectToAction(nameof(List));

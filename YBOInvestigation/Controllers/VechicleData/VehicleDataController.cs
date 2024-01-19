@@ -79,9 +79,6 @@ namespace YBOInvestigation.Controllers.VechicleData
         {
             List<FuelType> uniqueFuelTypes = _serviceFactory.CreateFuelTypeService().GetUniqueFuelTypes();
             List<Manufacturer> uniqueManufacturers = _serviceFactory.CreateManufacturerService().GetUniqueManufacturers();
-            //List<YBSCompany> uniqueYBSCompanies = _serviceFactory.CreateYBSCompanyService().GetUniqueYBSCompanys();
-            //List<YBSType> uniqueYBSTypes = _serviceFactory.CreateYBSTypeService().GetUniqueYBSTypes();
-
             ViewBag.FuelTypes = GetItemsFromList(uniqueFuelTypes, "FuelTypePkid", "FuelTypeName");
             ViewBag.Manufacturers = GetItemsFromList(uniqueManufacturers, "ManufacturerPkid", "ManufacturerName");
             ViewBag.YBSCompanies = _serviceFactory.CreateYBSCompanyService().GetSelectListYBSCompanys();//GetItemsFromList(uniqueYBSCompanies, "YBSCompanyPkid", "YBSCompanyName");
@@ -92,9 +89,23 @@ namespace YBOInvestigation.Controllers.VechicleData
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdEgerLoad(Id);
-            return View(vehicleData);
+            try
+            {
+                VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdEgerLoad(Id);
+                if (vehicleData != null)
+                {
+                    return View(vehicleData);
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                    return RedirectToAction(nameof(SearchVehicle));
+                }
+            }catch(Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                return RedirectToAction(nameof(SearchVehicle));
+            }
         }
 
         public JsonResult GetYBSTypeByYBSCompanyId(int ybsCompanyId)

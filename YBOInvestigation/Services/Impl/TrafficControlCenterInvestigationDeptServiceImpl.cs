@@ -73,8 +73,11 @@ namespace YBOInvestigation.Services.Impl
             trafficControlCenterInvestigationDept.CreatedBy = "admin";
             if (!string.IsNullOrEmpty(trafficControlCenterInvestigationDept.DriverName) && int.TryParse(trafficControlCenterInvestigationDept.DriverName, out int oldDriverPkId))
             {
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                trafficControlCenterInvestigationDept.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null)
+                {
+                    trafficControlCenterInvestigationDept.DriverName = oldDriver.DriverName;
+                }
             }
             Driver existingDriver = _driverService.FindDriverByLicense(trafficControlCenterInvestigationDept.DriverLicense);
             if (existingDriver == null)
@@ -105,8 +108,11 @@ namespace YBOInvestigation.Services.Impl
             trafficControlCenterInvestigationDept.CreatedBy = "admin";
             if (int.TryParse(trafficControlCenterInvestigationDept.DriverName, out int oldDriverPkId))
             {
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                trafficControlCenterInvestigationDept.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null)
+                {
+                    trafficControlCenterInvestigationDept.DriverName = oldDriver.DriverName;
+                }
             }
             Driver existingDriver = _driverService.FindDriverByLicense(trafficControlCenterInvestigationDept.DriverLicense);
             if (existingDriver == null)

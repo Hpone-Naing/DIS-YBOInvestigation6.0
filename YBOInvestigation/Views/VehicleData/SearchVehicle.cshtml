@@ -10,7 +10,10 @@
 <div class="d-flex justify-content-center align-item-center pb-4">
     <label class="text-primary h4"> မော်တော်ယာဥ်ရှာရန်</label>
 </div>
-
+@if (TempData.ContainsKey("Message") && TempData.ContainsKey("CssColor"))
+{
+    <div class="alert @TempData["CssColor"]"> @TempData["Message"] </div>
+}
 <div class="row mt-3 search-container">
     <div class="col-lg-8">
         <form class="input-group" method="get" action="@Url.Action("SearchVehicle", "VehicleData")">

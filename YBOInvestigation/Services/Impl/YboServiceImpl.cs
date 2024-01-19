@@ -74,8 +74,11 @@ namespace YBOInvestigation.Services.Impl
             yboRecord.CreatedBy = "admin";
             if (!string.IsNullOrEmpty(yboRecord.DriverName) && int.TryParse(yboRecord.DriverName, out int oldDriverPkId))
             {
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                yboRecord.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null)
+                {
+                    yboRecord.DriverName = oldDriver.DriverName;
+                }
             }
             Driver existingDriver = _driverService.FindDriverByLicense(yboRecord.DriverLicense);
             if (existingDriver == null)
@@ -106,9 +109,11 @@ namespace YBOInvestigation.Services.Impl
             yboRecord.CreatedBy = "admin";
             if (int.TryParse(yboRecord.DriverName, out int oldDriverPkId))
             {
-                Console.WriteLine("here if");
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                yboRecord.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null )
+                {
+                    yboRecord.DriverName = oldDriver.DriverName;
+                }
             }
             Driver existingDriver = _driverService.FindDriverByLicense(yboRecord.DriverLicense);
             if (existingDriver == null)

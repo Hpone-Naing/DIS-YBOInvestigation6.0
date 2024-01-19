@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
+using System.Linq.Expressions;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
 {
@@ -86,7 +88,10 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
 
         private void AddViewBag(int vehicleId = 0)
         {
+            Console.WriteLine("vehicle id: " + vehicleId);
             VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdYBSTableEgerLoad(vehicleId);
+            Console.WriteLine("VehicleData pkid: " + vehicleData.VehicleTypePkid);
+            Console.WriteLine("VehicleData vehicleno: " + vehicleData.VehicleNumber);
             List<Driver> drivers = _serviceFactory.CreateDriverService().GetDriversByVehicleDataId(vehicleData.VehicleDataPkid).Where(driver => driver.VehicleData.VehicleNumber == vehicleData.VehicleNumber).ToList();
             ViewBag.YBSCompany = _serviceFactory.CreateYBSCompanyService().FindYBSCompanyById(vehicleData.YBSCompany.YBSCompanyPkid);//.GetSelectListYBSCompanys();
             ViewBag.YBSType = _serviceFactory.CreateYBSTypeService().FindYBSTypeById(vehicleData.YBSType.YBSTypePkid);//.GetSelectListYBSTypesByYBSCompanyId(vehicleData.YBSCompany.YBSCompanyPkid);
@@ -99,10 +104,17 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            AddViewBag(vehicleId);
-
-            return View();
+            Console.WriteLine("Here create get method call: " + vehicleId);
+            try
+            {
+                AddViewBag(vehicleId);
+                return View();
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view create page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
 
@@ -115,28 +127,24 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             callCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
-            if (_serviceFactory.CreateCallCenterInvestigationDeptService().CreateCallCenterInvestigationDept(callCenterInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Save Success", "alert-success");
-                try
+                if (_serviceFactory.CreateCallCenterInvestigationDeptService().CreateCallCenterInvestigationDept(callCenterInvestigationDept))
                 {
+                    Utility.AlertMessage(this, "Save Success", "alert-success");
                     return RedirectToAction(nameof(List));
                 }
-                catch (NullReferenceException ne)
+                else
                 {
-                    Utility.AlertMessage(this, "Data Issue. Please fill CallCenterInvestigationDept in database", "alert-danger");
-                    return View();
-                }
-                catch (SqlException se)
-                {
-                    Utility.AlertMessage(this, "Internal Server Error", "alert-danger");
-                    return View();
+                    Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
+
                 }
             }
-            else
+            catch (Exception e)
             {
                 Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
-                return View();
+                return RedirectToAction(nameof(List));
             }
         }
 
@@ -144,18 +152,37 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
-            AddViewBag(callCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
-            return View(callCenterInvestigationDept);
+            try
+            {
+
+                CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
+                AddViewBag(callCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                return View(callCenterInvestigationDept);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
+
+
         }
 
         public IActionResult Details(int Id)
         {
+            try
+            { 
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
-            return View(callCenterInvestigationDept);
+                CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
+                return View(callCenterInvestigationDept);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         [ValidateAntiForgeryToken]
@@ -166,19 +193,31 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
                 return RedirectToAction("Index", "Login");
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            callCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
-            if (_serviceFactory.CreateCallCenterInvestigationDeptService().EditCallCenterInvestigationDept(callCenterInvestigationDept))
-            {
 
-                Utility.AlertMessage(this, "Edit Success", "alert-success");
-                return RedirectToAction(nameof(List));
-            }
-            else
+            callCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
+
+            try
             {
+                if (_serviceFactory.CreateCallCenterInvestigationDeptService().EditCallCenterInvestigationDept(callCenterInvestigationDept))
+                {
+
+                    Utility.AlertMessage(this, "Edit Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    CallCenterInvestigationDept oldCallCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(callCenterInvestigationDept.CallCenterInvestigationDeptPkid);
+                    AddViewBag(oldCallCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                    Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                    return View(oldCallCenterInvestigationDept);
+                }
+            }
+            catch (Exception e)
+            {
+                CallCenterInvestigationDept oldCallCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(callCenterInvestigationDept.CallCenterInvestigationDeptPkid);
+                AddViewBag(oldCallCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
-                CallCenterInvestigationDept record = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(callCenterInvestigationDept.CallCenterInvestigationDeptPkid);
-                AddViewBag();
-                return View(record);
+                return View(oldCallCenterInvestigationDept);
             }
         }
 
@@ -190,14 +229,24 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptById(Id);
-            if (_serviceFactory.CreateCallCenterInvestigationDeptService().DeleteCallCenterInvestigationDept(callCenterInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Delete Success", "alert-success");
-                return RedirectToAction(nameof(List));
+                CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptById(Id);
+                if (_serviceFactory.CreateCallCenterInvestigationDeptService().DeleteCallCenterInvestigationDept(callCenterInvestigationDept))
+                {
+                    Utility.AlertMessage(this, "Delete Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+
+                    Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
+                }
             }
-            else
+            catch (Exception e)
             {
+
                 Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
                 return RedirectToAction(nameof(List));
             }

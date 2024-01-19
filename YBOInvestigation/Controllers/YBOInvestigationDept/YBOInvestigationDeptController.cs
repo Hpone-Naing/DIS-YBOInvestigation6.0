@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
 {
@@ -97,12 +98,18 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
         }
         public IActionResult Create(int vehicleId)
         {
-            if (!SessionUtil.IsActiveSession(HttpContext))
-                return RedirectToAction("Index", "Login");
-
-            AddViewBag(vehicleId);
-
-            return View();
+            try
+            {
+                if (!SessionUtil.IsActiveSession(HttpContext))
+                    return RedirectToAction("Index", "Login");
+                AddViewBag(vehicleId);
+                return View();
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view create page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
 
@@ -115,47 +122,56 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             yBOInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
-            if (_serviceFactory.CreateYBOInvestigationDeptService().CreateYBOInvestigationDept(yBOInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Save Success", "alert-success");
-                try
+                if (_serviceFactory.CreateYBOInvestigationDeptService().CreateYBOInvestigationDept(yBOInvestigationDept))
                 {
+                    Utility.AlertMessage(this, "Save Success", "alert-success");
                     return RedirectToAction(nameof(List));
                 }
-                catch (NullReferenceException ne)
+                else
                 {
-                    Utility.AlertMessage(this, "Data Issue. Please fill YBOInvestigationDept in database", "alert-danger");
-                    return View();
+                    Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
                 }
-                catch (SqlException se)
-                {
-                    Utility.AlertMessage(this, "Internal Server Error", "alert-danger");
-                    return View();
-                }
-            }
-            else
+            }catch(Exception e)
             {
                 Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
-                return View();
+                return RedirectToAction(nameof(List));
             }
         }
 
         public IActionResult Edit(int Id)
         {
-            if (!SessionUtil.IsActiveSession(HttpContext))
-                return RedirectToAction("Index", "Login");
-            YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(Id);
-            AddViewBag(yBOInvestigationDept.Driver.VehicleData.VehicleDataPkid);
-            return View(yBOInvestigationDept);
+            try
+            {
+                if (!SessionUtil.IsActiveSession(HttpContext))
+                    return RedirectToAction("Index", "Login");
+                YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(Id);
+                AddViewBag(yBOInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                return View(yBOInvestigationDept);
+            }catch(Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         public IActionResult Details(int Id)
         {
-            if (!SessionUtil.IsActiveSession(HttpContext))
-                return RedirectToAction("Index", "Login");
+            try
+            {
+                if (!SessionUtil.IsActiveSession(HttpContext))
+                    return RedirectToAction("Index", "Login");
 
-            YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(Id);
-            return View(yBOInvestigationDept);
+                YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(Id);
+                return View(yBOInvestigationDept);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         [ValidateAntiForgeryToken]
@@ -167,18 +183,27 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             yBOInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
-            if (_serviceFactory.CreateYBOInvestigationDeptService().EditYBOInvestigationDept(yBOInvestigationDept))
+            try
             {
+                if (_serviceFactory.CreateYBOInvestigationDeptService().EditYBOInvestigationDept(yBOInvestigationDept))
+                {
 
-                Utility.AlertMessage(this, "Edit Success", "alert-success");
-                return RedirectToAction(nameof(List));
-            }
-            else
+                    Utility.AlertMessage(this, "Edit Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    YBOInvestigationDept oldYBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(yBOInvestigationDept.YBOInvestigationDeptPkid);
+                    AddViewBag(oldYBOInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                    Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                    return View(oldYBOInvestigationDept);
+                }
+            }catch(Exception e)
             {
+                YBOInvestigationDept oldYBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(yBOInvestigationDept.YBOInvestigationDeptPkid);
+                AddViewBag(oldYBOInvestigationDept.Driver.VehicleData.VehicleDataPkid);
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
-                YBOInvestigationDept record = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(yBOInvestigationDept.YBOInvestigationDeptPkid);
-                AddViewBag();
-                return View(record);
+                return View(oldYBOInvestigationDept);
             }
         }
 
@@ -190,13 +215,20 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(Id);
-            if (_serviceFactory.CreateYBOInvestigationDeptService().DeleteYBOInvestigationDept(yBOInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Delete Success", "alert-success");
-                return RedirectToAction(nameof(List));
-            }
-            else
+                YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(Id);
+                if (_serviceFactory.CreateYBOInvestigationDeptService().DeleteYBOInvestigationDept(yBOInvestigationDept))
+                {
+                    Utility.AlertMessage(this, "Delete Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
+                }
+            }catch(Exception e)
             {
                 Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
                 return RedirectToAction(nameof(List));

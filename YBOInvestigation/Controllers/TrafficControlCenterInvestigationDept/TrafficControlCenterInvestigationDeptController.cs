@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptController
 {
@@ -114,46 +115,57 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             trafficControlCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
-            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().CreateTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Save Success", "alert-success");
-                try
+                if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().CreateTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))
                 {
+                    Utility.AlertMessage(this, "Save Success", "alert-success");
                     return RedirectToAction(nameof(List));
                 }
-                catch (NullReferenceException ne)
+                else
                 {
-                    Utility.AlertMessage(this, "Data Issue. Please fill TrafficControlCenterInvestigationDept in database", "alert-danger");
-                    return View();
-                }
-                catch (SqlException se)
-                {
-                    Utility.AlertMessage(this, "Internal Server Error", "alert-danger");
-                    return View();
+                    Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
                 }
             }
-            else
+            catch(Exception e)
             {
                 Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
-                return View();
+                return RedirectToAction(nameof(List));
             }
         }
 
         public IActionResult Edit(int Id)
         {
-            if (!SessionUtil.IsActiveSession(HttpContext))
-                return RedirectToAction("Index", "Login");
-            TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
-            AddViewBag(trafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
-            return View(trafficControlCenterInvestigationDept);
+            try
+            {
+                if (!SessionUtil.IsActiveSession(HttpContext))
+                    return RedirectToAction("Index", "Login");
+                TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
+                AddViewBag(trafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                return View(trafficControlCenterInvestigationDept);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         public IActionResult Details(int Id)
         {
-            if (!SessionUtil.IsActiveSession(HttpContext))
-                return RedirectToAction("Index", "Login");
-            TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
-            return View(trafficControlCenterInvestigationDept);
+            try
+            {
+                if (!SessionUtil.IsActiveSession(HttpContext))
+                    return RedirectToAction("Index", "Login");
+                TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
+                return View(trafficControlCenterInvestigationDept);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         [ValidateAntiForgeryToken]
@@ -165,18 +177,28 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             trafficControlCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
-            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().EditTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))
+            try
             {
+                if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().EditTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))
+                {
 
-                Utility.AlertMessage(this, "Edit Success", "alert-success");
-                return RedirectToAction(nameof(List));
+                    Utility.AlertMessage(this, "Edit Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                    TrafficControlCenterInvestigationDept oldTrafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid);
+                    AddViewBag(oldTrafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                    return View(trafficControlCenterInvestigationDept);
+                }
             }
-            else
+            catch(Exception e)
             {
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
-                TrafficControlCenterInvestigationDept record = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid);
-                AddViewBag();
-                return View(record);
+                TrafficControlCenterInvestigationDept oldTrafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid);
+                AddViewBag(oldTrafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                return View(oldTrafficControlCenterInvestigationDept);
             }
         }
 
@@ -188,14 +210,23 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(Id);
-            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().DeleteTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Delete Success", "alert-success");
-                return RedirectToAction(nameof(List));
+                TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(Id);
+                if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().DeleteTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))
+                {
+                    Utility.AlertMessage(this, "Delete Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
+                }
             }
-            else
+            catch (Exception e)
             {
+
                 Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
                 return RedirectToAction(nameof(List));
             }

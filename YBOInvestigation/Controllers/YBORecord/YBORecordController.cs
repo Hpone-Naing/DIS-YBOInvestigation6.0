@@ -1,15 +1,11 @@
-﻿using YBOInvestigation.Classes;
-using YBOInvestigation.Factories;
-using YBOInvestigation.Util;
+﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using YBOInvestigation.Factories;
 using YBOInvestigation.Models;
-using YBOInvestigation.Paging;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Hosting;
+using YBOInvestigation.Util;
 
 namespace YBOInvestigation.Controllers.YBORecord
 {
@@ -95,17 +91,23 @@ namespace YBOInvestigation.Controllers.YBORecord
             ViewBag.YBSType = _serviceFactory.CreateYBSTypeService().FindYBSTypeById(vehicleData.YBSType.YBSTypePkid);//.GetSelectListYBSTypesByYBSCompanyId(vehicleData.YBSCompany.YBSCompanyPkid);
             ViewBag.VehicleNumber = vehicleData.VehicleNumber;
             ViewBag.AutoComplete = drivers
-                .Select(driver => new {DriverPkId = driver.DriverPkid ,DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
+                .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
                 .ToList();
         }
         public IActionResult Create(int vehicleId)
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            AddViewBag(vehicleId);
-
-            return View();
+            try
+            {
+                AddViewBag(vehicleId);
+                return View();
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view create page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
 
@@ -118,31 +120,24 @@ namespace YBOInvestigation.Controllers.YBORecord
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             yboRecord.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
-            if (_serviceFactory.CreateYBORecordService().CreateYboRecord(yboRecord))
+            try
             {
-                Utility.AlertMessage(this, "Save Success", "alert-success");
-                try
+
+                if (_serviceFactory.CreateYBORecordService().CreateYboRecord(yboRecord))
                 {
+                    Utility.AlertMessage(this, "Save Success", "alert-success");
                     return RedirectToAction(nameof(List));
                 }
-                catch (NullReferenceException ne)
+                else
                 {
-                    Utility.AlertMessage(this, "Data Issue. Please fill YboRecord in database", "alert-danger");
-                    AddViewBag();
-                    return View();
-                }
-                catch (SqlException se)
-                {
-                    Utility.AlertMessage(this, "Internal Server Error", "alert-danger");
-                    AddViewBag();
-                    return View();
+                    Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
                 }
             }
-            else
+            catch (Exception e)
             {
                 Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
-                AddViewBag();
-                return View();
+                return RedirectToAction(nameof(List));
             }
         }
 
@@ -150,18 +145,34 @@ namespace YBOInvestigation.Controllers.YBORecord
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(Id);
-            AddViewBag(yboRecord.Driver.VehicleData.VehicleDataPkid);
-            return View(yboRecord);
+            try
+            {
+                YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(Id);
+                AddViewBag(yboRecord.Driver.VehicleData.VehicleDataPkid);
+                return View(yboRecord);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         public IActionResult Details(int Id)
         {
-            if (!SessionUtil.IsActiveSession(HttpContext))
-                return RedirectToAction("Index", "Login");
+            try
+            {
+                if (!SessionUtil.IsActiveSession(HttpContext))
+                    return RedirectToAction("Index", "Login");
 
-            YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(Id);
-            return View(yboRecord);
+                YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(Id);
+                return View(yboRecord);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         [ValidateAntiForgeryToken]
@@ -173,17 +184,26 @@ namespace YBOInvestigation.Controllers.YBORecord
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             yboRecord.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
-            if (_serviceFactory.CreateYBORecordService().EditYboRecord(yboRecord))
+            try
             {
+                if (_serviceFactory.CreateYBORecordService().EditYboRecord(yboRecord))
+                {
 
-                Utility.AlertMessage(this, "Edit Success", "alert-success");
-                return RedirectToAction(nameof(List));
+                    Utility.AlertMessage(this, "Edit Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    YboRecord oldYboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(yboRecord.YboRecordPkid);
+                    Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                    return View(oldYboRecord);
+                }
             }
-            else
+            catch (Exception e)
             {
+                YboRecord oldYboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(yboRecord.YboRecordPkid);
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
-                YboRecord record = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(yboRecord.YboRecordPkid);
-                return View(record);
+                return View(oldYboRecord);
             }
         }
 
@@ -192,16 +212,24 @@ namespace YBOInvestigation.Controllers.YBORecord
         [HttpPost]
         public IActionResult Delete(int Id)
         {
-            if (!SessionUtil.IsActiveSession(HttpContext))
-                return RedirectToAction("Index", "Login");
-
-            YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordById(Id);
-            if (_serviceFactory.CreateYBORecordService().DeleteYboRecord(yboRecord))
+            try
             {
-                Utility.AlertMessage(this, "Delete Success", "alert-success");
-                return RedirectToAction(nameof(List));
+                if (!SessionUtil.IsActiveSession(HttpContext))
+                    return RedirectToAction("Index", "Login");
+
+                YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordById(Id);
+                if (_serviceFactory.CreateYBORecordService().DeleteYboRecord(yboRecord))
+                {
+                    Utility.AlertMessage(this, "Delete Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
+                }
             }
-            else
+            catch (Exception e)
             {
                 Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
                 return RedirectToAction(nameof(List));

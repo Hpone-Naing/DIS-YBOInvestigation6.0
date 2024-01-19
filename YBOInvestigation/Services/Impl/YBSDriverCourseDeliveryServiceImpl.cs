@@ -83,8 +83,11 @@ namespace YBOInvestigation.Services.Impl
             yBSDriverCourseDelivery.CreatedBy = "admin";
             if (!string.IsNullOrEmpty(yBSDriverCourseDelivery.DriverName) && int.TryParse(yBSDriverCourseDelivery.DriverName, out int oldDriverPkId))
             {
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                yBSDriverCourseDelivery.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null)
+                {
+                    yBSDriverCourseDelivery.DriverName = oldDriver.DriverName;
+                }
             }
             Driver existingDriver = _driverService.FindDriverByLicense(yBSDriverCourseDelivery.DriverLicense);
             TrainedYBSDriverInfo trainedDriverInfo = new TrainedYBSDriverInfo
@@ -139,8 +142,11 @@ namespace YBOInvestigation.Services.Impl
             yBSDriverCourseDelivery.CreatedBy = "admin";
             if (int.TryParse(yBSDriverCourseDelivery.DriverName, out int oldDriverPkId))
             {
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                yBSDriverCourseDelivery.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null)
+                {
+                    yBSDriverCourseDelivery.DriverName = oldDriver.DriverName;
+                }
             }
             TrainedYBSDriverInfo trainedDriverInfo = new TrainedYBSDriverInfo
             {

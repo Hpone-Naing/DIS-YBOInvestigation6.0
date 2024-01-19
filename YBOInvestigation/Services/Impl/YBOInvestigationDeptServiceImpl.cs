@@ -70,8 +70,11 @@ namespace YBOInvestigation.Services.Impl
             yBOInvestigationDept.CreatedBy = "admin";
             if (!string.IsNullOrEmpty(yBOInvestigationDept.DriverName) && int.TryParse(yBOInvestigationDept.DriverName, out int oldDriverPkId))
             {
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                yBOInvestigationDept.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null)
+                {
+                    yBOInvestigationDept.DriverName = oldDriver.DriverName;
+                }
             }
             Driver existingDriver = _driverService.FindDriverByLicense(yBOInvestigationDept.DriverLicense);
             if (existingDriver == null)
@@ -102,8 +105,11 @@ namespace YBOInvestigation.Services.Impl
             yBOInvestigationDept.CreatedBy = "admin";
             if (int.TryParse(yBOInvestigationDept.DriverName, out int oldDriverPkId))
             {
-                string oldDriverName = _driverService.FindDriverById(oldDriverPkId).DriverName;
-                yBOInvestigationDept.DriverName = oldDriverName;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                if(oldDriver != null)
+                {
+                    yBOInvestigationDept.DriverName = oldDriver.DriverName;
+                }
             }
             Driver existingDriver = _driverService.FindDriverByLicense(yBOInvestigationDept.DriverLicense);
             if (existingDriver == null)
@@ -129,7 +135,6 @@ namespace YBOInvestigation.Services.Impl
                 yBOInvestigationDept.Driver = existingDriver;
                 return Update(yBOInvestigationDept);
             }
-
         }
 
         public bool DeleteYBOInvestigationDept(YBOInvestigationDept yBOInvestigationDept)
