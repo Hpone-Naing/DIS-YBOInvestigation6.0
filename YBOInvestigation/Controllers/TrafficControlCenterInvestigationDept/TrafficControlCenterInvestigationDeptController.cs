@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using YBOInvestigation.Models;
 
 namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptController
 {
@@ -99,10 +100,16 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            AddViewBag(vehicleId);
-
-            return View();
+            try
+            {
+                AddViewBag(vehicleId);
+                return View();
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view create page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
 
@@ -137,10 +144,17 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
 
         public IActionResult Edit(int Id)
         {
+            if (!SessionUtil.IsActiveSession(HttpContext))
+                return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(Id) == null)
+            {
+                Utility.AlertMessage(this, "TrafficControlCenterDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             try
             {
-                if (!SessionUtil.IsActiveSession(HttpContext))
-                    return RedirectToAction("Index", "Login");
                 TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
                 AddViewBag(trafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
                 return View(trafficControlCenterInvestigationDept);
@@ -154,10 +168,17 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
 
         public IActionResult Details(int Id)
         {
+            if (!SessionUtil.IsActiveSession(HttpContext))
+                return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(Id) == null)
+            {
+                Utility.AlertMessage(this, "TrafficControlCenterDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             try
             {
-                if (!SessionUtil.IsActiveSession(HttpContext))
-                    return RedirectToAction("Index", "Login");
                 TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
                 return View(trafficControlCenterInvestigationDept);
             }
@@ -174,6 +195,13 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid) == null)
+            {
+                Utility.AlertMessage(this, "TrafficControlCenterDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             trafficControlCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;

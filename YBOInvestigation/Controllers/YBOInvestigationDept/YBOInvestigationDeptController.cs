@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using YBOInvestigation.Models;
 
 namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
 {
@@ -16,8 +17,6 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
         {
             _serviceFactory = serviceFactory;
         }
-
-
 
         private string MakeExcelFileName(string searchString, bool ExportAll, int? pageNo)
         {
@@ -98,10 +97,10 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
         }
         public IActionResult Create(int vehicleId)
         {
+            if (!SessionUtil.IsActiveSession(HttpContext))
+                return RedirectToAction("Index", "Login");
             try
-            {
-                if (!SessionUtil.IsActiveSession(HttpContext))
-                    return RedirectToAction("Index", "Login");
+            {   
                 AddViewBag(vehicleId);
                 return View();
             }
@@ -143,10 +142,17 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
 
         public IActionResult Edit(int Id)
         {
+            if (!SessionUtil.IsActiveSession(HttpContext))
+                return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(Id) == null)
+            {
+                Utility.AlertMessage(this, "YBOInvestigationDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             try
             {
-                if (!SessionUtil.IsActiveSession(HttpContext))
-                    return RedirectToAction("Index", "Login");
                 YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(Id);
                 AddViewBag(yBOInvestigationDept.Driver.VehicleData.VehicleDataPkid);
                 return View(yBOInvestigationDept);
@@ -159,11 +165,17 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
 
         public IActionResult Details(int Id)
         {
+            if (!SessionUtil.IsActiveSession(HttpContext))
+                return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(Id) == null)
+            {
+                Utility.AlertMessage(this, "YBOInvestigationDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             try
             {
-                if (!SessionUtil.IsActiveSession(HttpContext))
-                    return RedirectToAction("Index", "Login");
-
                 YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(Id);
                 return View(yBOInvestigationDept);
             }
@@ -180,6 +192,12 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(yBOInvestigationDept.YBOInvestigationDeptPkid) == null)
+            {
+                Utility.AlertMessage(this, "YBOInvestigationDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             yBOInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;

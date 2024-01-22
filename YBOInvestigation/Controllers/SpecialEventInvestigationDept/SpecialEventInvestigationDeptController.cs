@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ClosedXML.Excel;
+using YBOInvestigation.Models;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
 {
@@ -15,8 +17,6 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             _serviceFactory = serviceFactory;
         }
-
-
 
         private string MakeExcelFileName(string searchString, bool ExportAll, int? pageNo)
         {
@@ -66,8 +66,6 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
                             return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", MakeExcelFileName(searchString, ExportAll, pageNo));
                         }
                     }
-
-
                 }
                 return View(specialEventInvestigationDepts);
             }
@@ -95,10 +93,16 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            AddViewBag(vehicleId);
-
-            return View();
+            try
+            {
+                AddViewBag(vehicleId);
+                return View();
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view create page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
 
@@ -107,28 +111,23 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().CreateSpecialEventInvestigationDept(specialEventInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Save Success", "alert-success");
-                try
+                if (_serviceFactory.CreateSpecialEventInvestigationDeptService().CreateSpecialEventInvestigationDept(specialEventInvestigationDept))
                 {
+                    Utility.AlertMessage(this, "Save Success", "alert-success");
                     return RedirectToAction(nameof(List));
                 }
-                catch (NullReferenceException ne)
+                else
                 {
-                    Utility.AlertMessage(this, "Data Issue. Please fill SpecialEventInvestigationDept in database", "alert-danger");
-                    return View();
-                }
-                catch (SqlException se)
-                {
-                    Utility.AlertMessage(this, "Internal Server Error", "alert-danger");
+                    Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
                     return View();
                 }
             }
-            else
+            catch (Exception e)
             {
                 Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
-                return View();
+                return RedirectToAction(nameof(List));
             }
         }
 
@@ -136,10 +135,25 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(Id);
-            VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleByVehicleNumber(specialEventInvestigationDept.VehicleNumber);
-            AddViewBag(vehicleData.VehicleDataPkid);
-            return View(specialEventInvestigationDept);
+
+            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(Id) == null)
+            {
+                Utility.AlertMessage(this, "SpecialEventInvestigationDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
+            try
+            {
+                SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(Id);
+                VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleByVehicleNumber(specialEventInvestigationDept.VehicleNumber);
+                AddViewBag(vehicleData.VehicleDataPkid);
+                return View(specialEventInvestigationDept);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         public IActionResult Details(int Id)
@@ -147,8 +161,22 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(Id);
-            return View(specialEventInvestigationDept);
+            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(Id) == null)
+            {
+                Utility.AlertMessage(this, "SpecialEventInvestigationDept record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
+            try
+            {
+                SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(Id);
+                return View(specialEventInvestigationDept);
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
         }
 
         [ValidateAntiForgeryToken]
@@ -157,21 +185,37 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().EditSpecialEventInvestigationDept(specialEventInvestigationDept))
-            {
 
-                Utility.AlertMessage(this, "Edit Success", "alert-success");
+            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(specialEventInvestigationDept.SpecialEventInvestigationDeptDeptPkid) == null)
+            {
+                Utility.AlertMessage(this, "SpecialEventInvestigationDept record doesn't exit!", "alert-primary");
                 return RedirectToAction(nameof(List));
             }
-            else
+
+            try
+            {
+                if (_serviceFactory.CreateSpecialEventInvestigationDeptService().EditSpecialEventInvestigationDept(specialEventInvestigationDept))
+                {
+                    Utility.AlertMessage(this, "Edit Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                    SpecialEventInvestigationDept record = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(specialEventInvestigationDept.SpecialEventInvestigationDeptDeptPkid);
+                    AddViewBag();
+                    return View(record);
+                }
+            }
+            catch (Exception e)
             {
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
-                SpecialEventInvestigationDept record = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(specialEventInvestigationDept.SpecialEventInvestigationDeptDeptPkid);
-                AddViewBag();
-                return View(record);
+                SpecialEventInvestigationDept oldSpecialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(specialEventInvestigationDept.SpecialEventInvestigationDeptDeptPkid);
+                VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleByVehicleNumber(specialEventInvestigationDept.VehicleNumber);
+                AddViewBag(vehicleData.VehicleDataPkid);
+                return View(oldSpecialEventInvestigationDept);
             }
         }
-
 
         [ValidateAntiForgeryToken]
         [HttpPost]
@@ -179,15 +223,23 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(Id);
-            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().DeleteSpecialEventInvestigationDept(specialEventInvestigationDept))
+            try
             {
-                Utility.AlertMessage(this, "Delete Success", "alert-success");
-                return RedirectToAction(nameof(List));
+                SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(Id);
+                if (_serviceFactory.CreateSpecialEventInvestigationDeptService().DeleteSpecialEventInvestigationDept(specialEventInvestigationDept))
+                {
+                    Utility.AlertMessage(this, "Delete Success", "alert-success");
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction(nameof(List));
+                }
             }
-            else
+            catch (Exception e)
             {
+
                 Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
                 return RedirectToAction(nameof(List));
             }

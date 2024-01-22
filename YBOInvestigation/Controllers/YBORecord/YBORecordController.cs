@@ -145,6 +145,13 @@ namespace YBOInvestigation.Controllers.YBORecord
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateYBORecordService().FindYboRecordById(Id) == null)
+            {
+                Utility.AlertMessage(this, "YBO record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             try
             {
                 YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(Id);
@@ -160,11 +167,17 @@ namespace YBOInvestigation.Controllers.YBORecord
 
         public IActionResult Details(int Id)
         {
+            if (!SessionUtil.IsActiveSession(HttpContext))
+                return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateYBORecordService().FindYboRecordById(Id) == null)
+            {
+                Utility.AlertMessage(this, "YBO record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             try
             {
-                if (!SessionUtil.IsActiveSession(HttpContext))
-                    return RedirectToAction("Index", "Login");
-
                 YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(Id);
                 return View(yboRecord);
             }
@@ -181,6 +194,13 @@ namespace YBOInvestigation.Controllers.YBORecord
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
+
+            if(_serviceFactory.CreateYBORecordService().FindYboRecordById(yboRecord.YboRecordPkid) == null)
+            {
+                Utility.AlertMessage(this, "YBO record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             yboRecord.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
@@ -195,6 +215,7 @@ namespace YBOInvestigation.Controllers.YBORecord
                 else
                 {
                     YboRecord oldYboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(yboRecord.YboRecordPkid);
+                    AddViewBag(oldYboRecord.Driver.VehicleData.VehicleDataPkid);
                     Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                     return View(oldYboRecord);
                 }
@@ -202,6 +223,7 @@ namespace YBOInvestigation.Controllers.YBORecord
             catch (Exception e)
             {
                 YboRecord oldYboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(yboRecord.YboRecordPkid);
+                AddViewBag(oldYboRecord.Driver.VehicleData.VehicleDataPkid);
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                 return View(oldYboRecord);
             }

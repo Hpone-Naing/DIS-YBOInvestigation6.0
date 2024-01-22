@@ -24,7 +24,7 @@ namespace YBOInvestigation.Controllers.Auth
         {
             try
             {
-                var loginUser =  factoryBuilder.CreateUserService().FindUserByUserNameEgerLoad(user.UserID);
+                var loginUser = factoryBuilder.CreateUserService().FindUserByUserNameEgerLoad(user.UserID);
                 if (loginUser != null)
                 {
                     string hashedEnteredPassword = HashUtil.ComputeSHA256Hash(user.Password);
@@ -60,16 +60,24 @@ namespace YBOInvestigation.Controllers.Auth
 
         public IActionResult Logout()
         {
-            LoginUserInfo loginUserInfo = SessionUtil.GetLoginUserInfo(HttpContext);
-            var loginUser = factoryBuilder.CreateUserService().FindUserByUserName(loginUserInfo.UserID);
-
-            if (loginUserInfo.RememberMe)
+            try
             {
-                SessionUtil.SetLoginUserInfo(HttpContext, loginUserInfo);
+                LoginUserInfo loginUserInfo = SessionUtil.GetLoginUserInfo(HttpContext);
+                var loginUser = factoryBuilder.CreateUserService().FindUserByUserName(loginUserInfo.UserID);
+
+                if (loginUserInfo.RememberMe)
+                {
+                    SessionUtil.SetLoginUserInfo(HttpContext, loginUserInfo);
+                    return RedirectToAction("Index", "Login");
+                }
+                HttpContext.Session.Clear();
                 return RedirectToAction("Index", "Login");
             }
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Login");
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Logout Fail. Internal Server Error.", "alert-danger");
+                return RedirectToAction("Index", "Login");
+            }
         }
 
     }

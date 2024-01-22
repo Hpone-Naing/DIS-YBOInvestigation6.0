@@ -97,7 +97,7 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             ViewBag.PunishmentTypes = _serviceFactory.CreatePunishmentTypeService().GetPunishmentTypeSelectList(punishmentTypes, "PunishmentTypePkid", "Punishment");
             ViewBag.VehicleNumber = vehicleData.VehicleNumber;
             ViewBag.AutoComplete = drivers
-                .Select(driver => new {DriverPkId = driver.DriverPkid ,DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
+                .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
                 .ToList();
         }
         public IActionResult Create(int vehicleId)
@@ -105,17 +105,17 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
             try
-            { 
-            AddViewBag(vehicleId);
-            return View();
-        }
+            {
+                AddViewBag(vehicleId);
+                return View();
+            }
             catch (Exception e)
             {
                 Utility.AlertMessage(this, "Server Error encounter. Fail to view create page.", "alert-danger");
                 return RedirectToAction(nameof(List));
             }
 
-}
+        }
 
 
         [ValidateAntiForgeryToken, HttpPost]
@@ -128,12 +128,12 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             ybsDriverCourseDelivery.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
             try
-            { 
+            {
                 if (_serviceFactory.CreateYBSDriverCourseDeliveryService().CreateYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
                 {
                     Utility.AlertMessage(this, "Save Success", "alert-success");
                     return RedirectToAction(nameof(List));
-                
+
                 }
                 else
                 {
@@ -150,38 +150,44 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
 
         public IActionResult Edit(int Id)
         {
-            
+
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
             try
             {
                 YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
-            AddViewBag(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
-            return View(ybsDriverCourseDelivery);
-        }
+                AddViewBag(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
+                return View(ybsDriverCourseDelivery);
+            }
             catch (Exception e)
             {
                 Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
                 return RedirectToAction(nameof(List));
             }
-}
+        }
 
         public IActionResult Details(int Id)
         {
-            
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesById(Id) == null)
+            {
+                Utility.AlertMessage(this, "YBSDriverCourseDelivery record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             try
             {
                 YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
-            return View(ybsDriverCourseDelivery);
-        }
+                return View(ybsDriverCourseDelivery);
+            }
             catch (Exception e)
             {
                 Utility.AlertMessage(this, "Server Error encounter. Fail to view detail page.", "alert-danger");
                 return RedirectToAction(nameof(List));
             }
-}
+        }
 
         [ValidateAntiForgeryToken]
         [HttpPost]
@@ -189,6 +195,13 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
+
+            if (_serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesById(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid) == null)
+            {
+                Utility.AlertMessage(this, "YBSDriverCourseDelivery record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
+            }
+
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             ybsDriverCourseDelivery.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
@@ -204,8 +217,7 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
                 {
                     YBSDriverCourseDelivery oldYbsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid);
                     AddViewBag(oldYbsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
-                    
-                Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                    Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                     return View(oldYbsDriverCourseDelivery);
                 }
             }

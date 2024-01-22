@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using YBOInvestigation.Factories;
+using YBOInvestigation.Models;
 using YBOInvestigation.Util;
 using YBOInvestigation.ViewModels;
 
@@ -43,29 +44,23 @@ namespace YBOInvestigation.Controllers.YBOInvestigationController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreatePunishmentTypeService().CreatePunishmentType(punishmentType))
+            try
             {
-                Utility.AlertMessage(this, "Save Success", "alert-success");
-                try
+                if (_serviceFactory.CreatePunishmentTypeService().CreatePunishmentType(punishmentType))
                 {
+                    Utility.AlertMessage(this, "Save Success", "alert-success");
                     return RedirectToAction("List", new { pageNo = pageNo });
                 }
-                catch (NullReferenceException ne)
+                else
                 {
-                    Utility.AlertMessage(this, "Data Issue. Please fill PunishmentType in database", "alert-danger");
+                    Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
                     return RedirectToAction("List", new { pageNo = pageNo });
-                }
-                catch (SqlException se)
-                {
-                    Utility.AlertMessage(this, "Internal Server Error", "alert-danger");
-                    return View();
                 }
             }
-            else
+            catch (Exception e)
             {
                 Utility.AlertMessage(this, "Save Fail.Internal Server Error", "alert-danger");
-                return View();
+                return RedirectToAction("List", new { pageNo = pageNo });
             }
         }
 
@@ -76,15 +71,29 @@ namespace YBOInvestigation.Controllers.YBOInvestigationController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            punishmentType.PunishmentTypePkid = Id;
-            if (_serviceFactory.CreatePunishmentTypeService().EditPunishmentType(punishmentType))
+            if (_serviceFactory.CreatePunishmentTypeService().FindPunishmentTypeById(punishmentType.PunishmentTypePkid) == null)
             {
-                Utility.AlertMessage(this, "Edit Success", "alert-success");
-                return RedirectToAction("List", new { pageNo = pageNo });
+                Utility.AlertMessage(this, "PunishmentType record doesn't exit!", "alert-primary");
+                return RedirectToAction(nameof(List));
             }
-            else
+
+            try
             {
-                Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
+                punishmentType.PunishmentTypePkid = Id;
+                if (_serviceFactory.CreatePunishmentTypeService().EditPunishmentType(punishmentType))
+                {
+                    Utility.AlertMessage(this, "Edit Success", "alert-success");
+                    return RedirectToAction("List", new { pageNo = pageNo });
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Edit Fail. Internal Server Error", "alert-danger");
+                    return RedirectToAction("List", new { pageNo = pageNo });
+                }
+            }
+            catch (Exception e)
+            {
+                Utility.AlertMessage(this, "Edit Fail. Internal Server Error", "alert-danger");
                 return RedirectToAction("List", new { pageNo = pageNo });
             }
         }
@@ -96,16 +105,23 @@ namespace YBOInvestigation.Controllers.YBOInvestigationController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            PunishmentType punishmentType = _serviceFactory.CreatePunishmentTypeService().FindPunishmentTypeById(Id);
-            if (_serviceFactory.CreatePunishmentTypeService().DeletePunishmentType(punishmentType))
+            try
             {
-                Utility.AlertMessage(this, "Delete Success", "alert-success");
-                return RedirectToAction("List", new { pageNo = pageNo });
+                PunishmentType punishmentType = _serviceFactory.CreatePunishmentTypeService().FindPunishmentTypeById(Id);
+                if (_serviceFactory.CreatePunishmentTypeService().DeletePunishmentType(punishmentType))
+                {
+                    Utility.AlertMessage(this, "Delete Success", "alert-success");
+                    return RedirectToAction("List", new { pageNo = pageNo });
+                }
+                else
+                {
+                    Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                    return RedirectToAction("List", new { pageNo = pageNo });
+                }
             }
-            else
+            catch (Exception e)
             {
-                Utility.AlertMessage(this, "Delete Fail.Internal Server Error", "alert-danger");
+                Utility.AlertMessage(this, "Delete Fail. Internal Server Error", "alert-danger");
                 return RedirectToAction("List", new { pageNo = pageNo });
             }
         }
