@@ -71,12 +71,6 @@ namespace YBOInvestigation.Controllers.YBOInvestigationController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreatePunishmentTypeService().FindPunishmentTypeById(punishmentType.PunishmentTypePkid) == null)
-            {
-                Utility.AlertMessage(this, "PunishmentType record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             {
                 punishmentType.PunishmentTypePkid = Id;

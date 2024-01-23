@@ -171,12 +171,6 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesById(Id) == null)
-            {
-                Utility.AlertMessage(this, "YBSDriverCourseDelivery record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             {
                 YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
@@ -195,12 +189,6 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesById(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid) == null)
-            {
-                Utility.AlertMessage(this, "YBSDriverCourseDelivery record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
 
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";

@@ -146,12 +146,6 @@ namespace YBOInvestigation.Controllers.YBORecord
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateYBORecordService().FindYboRecordById(Id) == null)
-            {
-                Utility.AlertMessage(this, "YBO record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             {
                 YboRecord yboRecord = _serviceFactory.CreateYBORecordService().FindYboRecordByIdEgerLoad(Id);
@@ -169,12 +163,6 @@ namespace YBOInvestigation.Controllers.YBORecord
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateYBORecordService().FindYboRecordById(Id) == null)
-            {
-                Utility.AlertMessage(this, "YBO record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
 
             try
             {
@@ -194,12 +182,6 @@ namespace YBOInvestigation.Controllers.YBORecord
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if(_serviceFactory.CreateYBORecordService().FindYboRecordById(yboRecord.YboRecordPkid) == null)
-            {
-                Utility.AlertMessage(this, "YBO record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
 
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";

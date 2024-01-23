@@ -147,12 +147,6 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "TrafficControlCenterDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             {
                 TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
@@ -170,12 +164,6 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "TrafficControlCenterDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
 
             try
             {
@@ -195,12 +183,6 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptById(trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid) == null)
-            {
-                Utility.AlertMessage(this, "TrafficControlCenterDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
 
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";

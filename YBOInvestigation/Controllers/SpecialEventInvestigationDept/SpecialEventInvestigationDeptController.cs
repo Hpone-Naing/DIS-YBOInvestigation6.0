@@ -136,12 +136,6 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "SpecialEventInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             {
                 SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(Id);
@@ -160,13 +154,7 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "SpecialEventInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
+          
             try
             {
                 SpecialEventInvestigationDept specialEventInvestigationDept = _serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptByIdEgerLoad(Id);
@@ -185,12 +173,6 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateSpecialEventInvestigationDeptService().FindSpecialEventInvestigationDeptById(specialEventInvestigationDept.SpecialEventInvestigationDeptDeptPkid) == null)
-            {
-                Utility.AlertMessage(this, "SpecialEventInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
 
             try
             {

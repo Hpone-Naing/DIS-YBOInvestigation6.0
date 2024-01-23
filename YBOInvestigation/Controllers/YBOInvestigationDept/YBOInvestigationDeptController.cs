@@ -145,12 +145,6 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "YBOInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             {
                 YBOInvestigationDept yBOInvestigationDept = _serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptByIdEgerLoad(Id);
@@ -167,12 +161,6 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "YBOInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
 
             try
             {
@@ -193,11 +181,6 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateYBOInvestigationDeptService().FindYBOInvestigationDeptById(yBOInvestigationDept.YBOInvestigationDeptPkid) == null)
-            {
-                Utility.AlertMessage(this, "YBOInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             yBOInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
