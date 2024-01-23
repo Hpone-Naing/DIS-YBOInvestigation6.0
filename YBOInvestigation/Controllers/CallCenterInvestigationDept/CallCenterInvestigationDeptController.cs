@@ -125,6 +125,7 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             callCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
+            
             try
             {
                 if (_serviceFactory.CreateCallCenterInvestigationDeptService().CreateCallCenterInvestigationDept(callCenterInvestigationDept))

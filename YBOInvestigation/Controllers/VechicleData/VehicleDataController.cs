@@ -108,6 +108,7 @@ namespace YBOInvestigation.Controllers.VechicleData
             }
         }
 
+
         public JsonResult GetYBSTypeByYBSCompanyId(int ybsCompanyId)
         {
             List<SelectListItem> ybsTypes = _serviceFactory.CreateYBSTypeService().GetSelectListYBSTypesByYBSCompanyId(ybsCompanyId);
