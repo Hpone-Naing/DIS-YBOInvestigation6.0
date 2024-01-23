@@ -56,7 +56,7 @@ namespace YBOInvestigation.Services.Impl
 
         protected bool IsSearchDataContained(object obj, string searchData, string column = null)
         {
-            _logger.LogInformation(">>>>>>>>>> [AbstractServiceImpl][IsSearchDataContained]Check searchString contain in table columns value <<<<<<<<<<");
+            _logger.LogInformation(">>>>>>>>>> [AbstractServiceImpl][IsSearchDataContained] Check searchString contain in table columns value <<<<<<<<<<");
             try
             {
                 if (obj != null)
@@ -73,7 +73,7 @@ namespace YBOInvestigation.Services.Impl
                                 {
                                     if (propValue.IndexOf(searchData, StringComparison.OrdinalIgnoreCase) >= 0)
                                     {
-                                        _logger.LogInformation(">>>>>>>>>> Match searchString and colVal <<<<<<<<<<");
+                                        //_logger.LogInformation(">>>>>>>>>> Match searchString and colVal <<<<<<<<<<");
                                         return true;
                                     }
                                 }
@@ -82,12 +82,12 @@ namespace YBOInvestigation.Services.Impl
                         }
                     }
                 }
-                _logger.LogInformation(">>>>>>>>>> Not match searchString and colVal <<<<<<<<<<");
+                //_logger.LogInformation(">>>>>>>>>> Not match searchString and colVal <<<<<<<<<<");
                 return false;
             }
             catch(Exception e)
             {
-                _logger.LogError(">>>>>>>>>> Error occur when retrieveing Unique Object List. <<<<<<<<<<" + e);
+                _logger.LogError(">>>>>>>>>> Error occur when checking searchString contain in table columns value. <<<<<<<<<<" + e);
                 throw;
             }
         }

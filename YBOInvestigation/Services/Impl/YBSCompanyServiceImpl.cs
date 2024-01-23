@@ -11,7 +11,6 @@ namespace YBOInvestigation.Services.Impl
         public YBSCompanyServiceImpl(YBOInvestigationDBContext context, ILogger<YBSCompanyServiceImpl> logger) : base(context, logger)
         {
             _logger = logger;
-
         }
 
         public List<YBSCompany> GetAllYBSCompanys()

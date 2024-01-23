@@ -36,7 +36,7 @@ namespace YBOInvestigation.Services.Impl
             }
             catch (Exception e)
             {
-                _logger.LogError(">>>>>>>>>> Error occur when retrieveing unique PunishmentType list. <<<<<<<<<<" + e);
+                _logger.LogError(">>>>>>>>>> Error occur when retrieveing unique FuelType list. <<<<<<<<<<" + e);
                 throw;
             }
         }
