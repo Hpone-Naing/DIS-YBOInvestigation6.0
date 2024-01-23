@@ -103,7 +103,6 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            Console.WriteLine("Here create get method call: " + vehicleId);
             try
             {
                 AddViewBag(vehicleId);
@@ -151,12 +150,6 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "CallCenterInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             {
 
@@ -176,12 +169,6 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
-            if (_serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptById(Id) == null)
-            {
-                Utility.AlertMessage(this, "CallCenterInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
             try
             { 
                 CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
@@ -200,13 +187,7 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
-            if (_serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptById(callCenterInvestigationDept.CallCenterInvestigationDeptPkid) == null)
-            {
-                Utility.AlertMessage(this, "CallCenterInvestigationDept record doesn't exit!", "alert-primary");
-                return RedirectToAction(nameof(List));
-            }
-
+            
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
 
