@@ -335,7 +335,7 @@ namespace YBOInvestigation.Services.Impl
         public DataTable MakeTrafficControlCenterInvestigationDeptExcelData(PagingList<TrafficControlCenterInvestigationDept> trafficControlCenterInvestigationDepts, bool exportAll)
         {
             _logger.LogInformation(">>>>>>>>>> [TrafficControlCenterInvestigationDeptServiceImpl][MakeTrafficControlCenterInvestigationDeptExcelData] Assign SearchAll or GetAll TrafficControlCenterInvestigationDept list to dataTable. <<<<<<<<<<");
-            DataTable dt = new DataTable("စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာန(Traffic Control Center) ဖမ်းစီးမှုစာရင်း");
+            DataTable dt = new DataTable("Traffic Control Centerစာရင်း");
             dt.Columns.AddRange(new DataColumn[14] {
                                         new DataColumn("ဖမ်းဆီးရက်စွဲ"),
                                         new DataColumn("ဖမ်းဆီးသည့်အချိန်"),

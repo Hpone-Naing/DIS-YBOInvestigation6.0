@@ -30,14 +30,14 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
         {
             if (ExportAll)
             {
-                return "YBSယာဥ်‌မောင်းများအားသင်တန်းပေးမှုမှတ်တမ်းအားလုံး" + DateTime.Now + ".xlsx";
+                return "YBSယာဥ်မောင်းများသင်တန်းပေးမှုမှတ်တမ်းအားလုံး" + DateTime.Now + ".xlsx";
             }
             else
             {
                 if (searchString != null && !string.IsNullOrEmpty(searchString))
-                    return "YBSယာဥ်‌မောင်းများအားသင်တန်းပေးမှုမှတ်တမ်းရှာဖွေမှု(" + searchString + ")" + DateTime.Now + ".xlsx";
+                    return "YBSယာဥ်မောင်းများသင်တန်းပေးမှုမှတ်တမ်းရှာဖွေမှု (" + searchString + ")" + DateTime.Now + ".xlsx";
                 else
-                    return "YBSယာဥ်‌မောင်းများအားသင်တန်းပေးမှုမှတ်တမ်း PageNumber( " + pageNo + " )" + DateTime.Now + ".xlsx";
+                    return "YBSယာဥ်မောင်းများသင်တန်းပေးမှုမှတ်တမ်း PageNumber( " + pageNo + " )" + DateTime.Now + ".xlsx";
             }
 
         }

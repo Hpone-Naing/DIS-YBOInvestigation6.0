@@ -328,7 +328,7 @@ namespace YBOInvestigation.Services.Impl
         public DataTable MakeYBOInvestigationDeptExcelData(PagingList<YBOInvestigationDept> yBOInvestigationDepts, bool exportAll)
         {
             _logger.LogInformation(">>>>>>>>>> [YBOInvestigationDeptServiceImpl][MakeYBOInvestigationDeptExcelData] Assign SearchAll or GetAll YBOInvestigationDept list to dataTable. <<<<<<<<<<");
-            DataTable dt = new DataTable("စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာန(YBO)စာရင်း");
+            DataTable dt = new DataTable("YBO စာရင်း");
             dt.Columns.AddRange(new DataColumn[13] {
                                         new DataColumn("ဖမ်းဆီးရက်စွဲ"),
                                         new DataColumn("ဖမ်းဆီးသည့်အချိန်"),

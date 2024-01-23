@@ -337,7 +337,7 @@ namespace YBOInvestigation.Services.Impl
         public DataTable MakeYboRecordExcelData(PagingList<YboRecord> yboRecords, bool exportAll)
         {
             _logger.LogInformation(">>>>>>>>>> [FindYboRecordByIdEgerLoad][MakeYboRecordExcelData] Assign SearchAll or GetAll YboRecord list to dataTable. <<<<<<<<<<");
-            DataTable dt = new DataTable("စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာနစာရင်း");
+            DataTable dt = new DataTable("စည်းကမ်းထိန်းသိမ်းရေးငှာနစာရင်း");
             dt.Columns.AddRange(new DataColumn[13] {
                                         new DataColumn("ဖမ်းဆီးရက်စွဲ"),
                                         new DataColumn("ဖမ်းဆီးသည့်အချိန်"),

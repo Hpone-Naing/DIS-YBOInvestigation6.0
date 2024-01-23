@@ -194,7 +194,7 @@ namespace YBOInvestigation.Services.Impl
         public DataTable MakeSpecialEventInvestigationDeptExcelData(PagingList<SpecialEventInvestigationDept> specialEventInvestigationDepts, bool exportAll)
         {
             _logger.LogInformation(">>>>>>>>>> [SpecialEventInvestigationDeptServiceImpl][MakeSpecialEventInvestigationDeptExcelData] Expor excel SpecialEventInvestigationDept. <<<<<<<<<<");
-            DataTable dt = new DataTable("စည်းကမ်းထိန်းသိမ်းရေးနှင့်စစ်ဆေးရေးငှာန(ထူးခြားဖြစ်စဥ်) စာရင်း");
+            DataTable dt = new DataTable("ထူးခြားဖြစ်စဥ် စာရင်း");
             dt.Columns.AddRange(new DataColumn[10] {
                                         new DataColumn("ဖြစ်ပွားရက်စွဲ"),
                                         new DataColumn("ဖြစ်ပွားသည့်အချိန်"),

@@ -398,7 +398,7 @@ namespace YBOInvestigation.Services.Impl
         public DataTable MakeYBSDriverCourseDeliveriesExcelData(PagingList<YBSDriverCourseDelivery> yBSDriverCourseDeliverys, bool exportAll)
         {
             _logger.LogInformation(">>>>>>>>>> [YBSDriverCourseDeliveryServiceImpl][MakeYBSDriverCourseDeliveriesExcelData] Assign SearchAll or GetAll YBSDriverCourseDelivery list to dataTable. <<<<<<<<<<");
-            DataTable dt = new DataTable("YBSယာဥ်မောင်းများသင်တန်းပေးမှုစာရင်း");
+            DataTable dt = new DataTable("သင်တန်းပေးမှုစာရင်း");
             dt.Columns.AddRange(new DataColumn[13] {
                                         new DataColumn("ပြုလုပ်ရက်စွဲ"),
                                         new DataColumn("အမှုအမျိုးအစား"),
@@ -452,7 +452,7 @@ namespace YBOInvestigation.Services.Impl
             {
                 foreach (var yBSDriverCourseDelivery in list)
                 {
-                    dt.Rows.Add(yBSDriverCourseDelivery.EventDate, yBSDriverCourseDelivery.PunishmentType.Punishment, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Age, yBSDriverCourseDelivery.TrainedYBSDriverInfo.FatherName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.EducationLevel, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Address, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Phone, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleNumber, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverLicense, yBSDriverCourseDelivery.YBSCompany.YBSCompanyName, yBSDriverCourseDelivery.YBSType.YBSTypeName);
+                    dt.Rows.Add(yBSDriverCourseDelivery.EventDate, yBSDriverCourseDelivery.PunishmentType.Punishment, yBSDriverCourseDelivery.TotalRecord, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Age, yBSDriverCourseDelivery.TrainedYBSDriverInfo.FatherName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.EducationLevel, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Address, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Phone, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleNumber, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverLicense, yBSDriverCourseDelivery.YBSCompany.YBSCompanyName, yBSDriverCourseDelivery.YBSType.YBSTypeName);
                 }
             }
                 _logger.LogInformation(">>>>>>>>>> Assign list to dataTable success. <<<<<<<<<<");
