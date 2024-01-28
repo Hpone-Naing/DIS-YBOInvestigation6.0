@@ -88,7 +88,7 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         private void AddViewBag(int vehicleId = 0)
         {
             Console.WriteLine("vehicle id: " + vehicleId);
-            VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdYBSTableEgerLoad(vehicleId);
+            VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdContainSoftDeleteEgerLoad(vehicleId);
             Console.WriteLine("VehicleData pkid: " + vehicleData.VehicleTypePkid);
             Console.WriteLine("VehicleData vehicleno: " + vehicleData.VehicleNumber);
             List<Driver> drivers = _serviceFactory.CreateDriverService().GetDriversByVehicleDataId(vehicleData.VehicleDataPkid).Where(driver => driver.VehicleData.VehicleNumber == vehicleData.VehicleNumber).ToList();
@@ -148,19 +148,21 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
 
         public IActionResult Edit(int Id)
         {
+            Console.WriteLine("here Edit:");
+            Console.WriteLine("here id:" + Id);
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
             try
             {
-
                 CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
                 AddViewBag(callCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
                 return View(callCenterInvestigationDept);
             }
             catch (Exception e)
             {
-                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger");
+                Console.WriteLine(e);
+                Utility.AlertMessage(this, "Server Error encounter. Fail to view edit page.", "alert-danger" + e);
                 return RedirectToAction(nameof(List));
             }
         }

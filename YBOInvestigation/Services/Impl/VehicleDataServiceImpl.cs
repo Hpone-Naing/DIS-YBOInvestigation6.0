@@ -91,25 +91,6 @@ namespace YBOInvestigation.Services.Impl
             }
         }
 
-        /*public bool CreateVehicle(VehicleData vehicleData)
-        {
-            vehicleData.IsDeleted = false;
-            vehicleData.CreatedDate = DateTime.Now;
-            vehicleData.RegistrationDate = DateTime.Now;
-            return Create(vehicleData);
-        }
-
-        public bool EditVehicle(VehicleData vehicleData)
-        {
-            return Update(vehicleData);
-        }
-
-        public bool DeleteVehicle(VehicleData vehicleData)
-        {
-            vehicleData.IsDeleted = true;
-            return Update(vehicleData);
-        }*/
-
         public VehicleData FindVehicleDataById(int id)
         {
             _logger.LogInformation(">>>>>>>>>> [VehicleDataServiceImpl][FindVehicleDataById] Find VehicleData by pkId. <<<<<<<<<<");
@@ -144,6 +125,27 @@ namespace YBOInvestigation.Services.Impl
                 throw;
             }
         }
+
+        public VehicleData FindVehicleDataByIdContainSoftDeleteEgerLoad(int id)
+        {
+            _logger.LogInformation(">>>>>>>>>> [VehicleDataServiceImpl][FindVehicleDataByIdContainSoftDeleteEgerLoad] Find VehicleData by pkId with eger load. <<<<<<<<<<");
+            try
+            {
+                _logger.LogInformation(">>>>>>>>>> Success. Find VehicleData by pkId with eger load. <<<<<<<<<<");
+                return _context.VehicleDatas
+                           .Include(vehicle => vehicle.YBSCompany)
+                           .Include(vehicle => vehicle.YBSType)
+                           .Include(vehicle => vehicle.Manufacturer)
+                           .Include(vehicle => vehicle.FuelType)
+                           .FirstOrDefault(vehicle => vehicle.VehicleDataPkid == id);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(">>>>>>>>>> Error occur when finding VehicleData by pkId with eger load. <<<<<<<<<<" + e);
+                throw;
+            }
+        }
+
 
         public VehicleData FindVehicleDataByIdYBSTableEgerLoad(int id)
         {
