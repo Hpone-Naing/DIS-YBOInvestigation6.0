@@ -13,5 +13,6 @@ namespace YBOInvestigation.Services
         YboRecord FindYboRecordByIdEgerLoad(int id);
         bool EditYboRecord(YboRecord yboRecord);
         DataTable MakeYboRecordExcelData(PagingList<YboRecord> yboRecords, bool exportAll);
+        public int GetTotalRecordByDriver(int driverPkId);
     }
 }

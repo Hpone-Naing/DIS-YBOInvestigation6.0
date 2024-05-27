@@ -8,40 +8,40 @@ namespace YBOInvestigation.Models
         [Key]
         public int CallCenterInvestigationDeptPkid { get; set; }
 
-        [DisplayName("ဖမ်းဆီးရက်စွဲ")]
+        [DisplayName("တိုင်ကြားရက်စွဲ")]
         public DateTime? RecordDate { get; set; }
 
-        [DisplayName("ဖမ်းဆီးသည့်အချိန်")]
+        [DisplayName("တိုင်ကြားသည့်အချိန်")]
         public DateTime? RecordTime { get; set; }
 
         [NotMapped]
         [StringLength(50)]
         [DisplayName("ယာဥ်မောင်းအမည်")]
-        public string DriverName { get; set; }
+        public string? DriverName { get; set; }
 
         [NotMapped]
         [StringLength(50)]
         [DisplayName("ယာဥ်အမှတ်")]
-        public string VehicleNumber { get; set; }
+        public string? VehicleNumber { get; set; }
 
         [DisplayName("အကြိမ်အရေအတွက်")]
         public int? TotalRecord { get; set; }
 
         [StringLength(50)]
         [DisplayName("ဖုန်းနံပါတ်")]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [StringLength(50)]
         [DisplayName("သတင်းပေးပို့သူ")]
-        public string YbsRecordSender { get; set; }
+        public string? YbsRecordSender { get; set; }
 
         [StringLength(500)]
         [DisplayName("တိုင်ကြားသည့်အကြောင်းအရာ")]
-        public string RecordDescription { get; set; }
+        public string? RecordDescription { get; set; }
 
         [StringLength(50)]
         [DisplayName("ဆောင်ရွက်ပြီးစီးမှု")]
-        public string CompletionStatus { get; set; }
+        public string? CompletionStatus { get; set; }
 
         [DisplayName("ပေးသွင်းရက်စွဲ")]
         public DateTime? CompletedDate { get; set; }
@@ -49,17 +49,18 @@ namespace YBOInvestigation.Models
         [NotMapped]
         [StringLength(50)]
         [DisplayName("လိုင်စင်အမှတ်")]
-        public string DriverLicense { get; set; }
+        public string? DriverLicense { get; set; }
 
+        [NotMapped]
         [StringLength(50)]
         [DisplayName("ID အမှတ်")]
-        public string IDNumber { get; set; }
+        public string? IDNumber { get; set; }
 
         public bool? IsDeleted { get; set; }
         public DateTime? CreatedDate { get; set; }
 
         [StringLength(50)]
-        public string CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
 
         [ForeignKey("YBSCompany")]
         [DisplayName("YBS Company")]
@@ -75,5 +76,20 @@ namespace YBOInvestigation.Models
         [DisplayName("ယာဥ်မောင်း")]
         public int DriverPkid { get; set; }
         public virtual Driver Driver { get; set; }
+
+        public bool IsDefaultIdNumber()
+        {
+            return IDNumber == null || IDNumber == "စီစစ်ဆဲ";
+        }
+
+        public bool IsDefaultLinenseNumber()
+        {
+            return DriverLicense == null || DriverLicense == "စီစစ်ဆဲ";
+        }
+
+        public bool IsNotDefaultDriver()
+        {
+            return (!IsDefaultLinenseNumber() || !IsDefaultIdNumber());
+        }
     }
 }

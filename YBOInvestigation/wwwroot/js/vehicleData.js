@@ -30,7 +30,7 @@ $(document).ready(function () {
     if (alertBox.length > 0) {
         setTimeout(function () {
             alertBox.fadeOut(500);
-        }, 3000);
+        }, 5000);
     }
 });
 
@@ -70,6 +70,4 @@ $(document).ready(function () {
         $('#deletePkId').val(pkId);
     });
 });
-
-
 

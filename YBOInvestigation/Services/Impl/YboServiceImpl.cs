@@ -49,6 +49,7 @@ namespace YBOInvestigation.Services.Impl
                             .Include(yboRecord => yboRecord.YBSType)
                             .Include(yboRecord => yboRecord.Driver)
                             .Include(yboRecord => yboRecord.Driver.VehicleData)
+                            .OrderByDescending(yboRecord => yboRecord.CreatedDate)
                             .ToList();
             }
             catch (Exception e)
@@ -76,12 +77,14 @@ namespace YBOInvestigation.Services.Impl
                             .Include(yboRecord => yboRecord.YBSType)
                             .Include(yboRecord => yboRecord.Driver)
                             .Include(yboRecord => yboRecord.Driver.VehicleData)
-                            .ToList()
+                            .AsEnumerable()
                             .Where(yboRecord => IsSearchDataContained(yboRecord, searchString)
                             || IsSearchDataContained(yboRecord.YBSCompany, searchString)
                             || IsSearchDataContained(yboRecord.YBSType, searchString)
                             || IsSearchDataContained(yboRecord.Driver, searchString)
-                            ).AsQueryable().ToList();
+                            )
+                            .OrderByDescending(yboRecord => yboRecord.CreatedDate)
+                            .ToList();
                     }
                     catch (Exception e)
                     {
@@ -101,6 +104,7 @@ namespace YBOInvestigation.Services.Impl
                             .Include(yboRecord => yboRecord.YBSType)
                             .Include(yboRecord => yboRecord.Driver)
                             .Include(yboRecord => yboRecord.Driver.VehicleData)
+                            .OrderByDescending(yboRecord => yboRecord.CreatedDate)
                             .ToList();
                     }
                     catch (Exception e)
@@ -128,6 +132,7 @@ namespace YBOInvestigation.Services.Impl
             _logger.LogInformation(">>>>>>>>>> Parse integer driverPkId. <<<<<<<<<<");
             try
             {
+
                 _logger.LogInformation(">>>>>>>>>> Success parse integer driverPkId. <<<<<<<<<<");
                 try
                 {
@@ -138,6 +143,10 @@ namespace YBOInvestigation.Services.Impl
                         if (oldDriver != null)
                         {
                             yboRecord.DriverName = oldDriver.DriverName;
+                        }
+                        else
+                        {
+                            yboRecord.DriverName = "စီစစ်ဆဲ";
                         }
                         _logger.LogInformation(">>>>>>>>>> Success find driver by driverPkId and assign old drivername. <<<<<<<<<<");
                     }
@@ -154,11 +163,17 @@ namespace YBOInvestigation.Services.Impl
                 throw;
             }
             Driver existingDriver = null;
+            VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yboRecord.VehicleNumber);
+
             _logger.LogInformation(">>>>>>>>>> Get driver by driverLicense. <<<<<<<<<<");
             try
             {
                 _logger.LogInformation(">>>>>>>>>> Success Get driver by driverLicense. <<<<<<<<<<");
-                existingDriver = _driverService.FindDriverByLicense(yboRecord.DriverLicense);
+
+                    existingDriver = _driverService.FindDriverByIdNumberAndLicenseAndVehicle(yboRecord.IDNumber , yboRecord.DriverLicense, vehicleData.VehicleDataPkid);
+                    Console.WriteLine("existing driver == null? ............." + (existingDriver == null));
+                
+                
             }
             catch (Exception e)
             {
@@ -170,12 +185,27 @@ namespace YBOInvestigation.Services.Impl
                 _logger.LogInformation(">>>>>>>>>> Create new driver or edit old driver and create YboRecord. <<<<<<<<<<");
                 if (existingDriver == null)
                 {
-                    VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yboRecord.VehicleNumber);
+                    Console.WriteLine("here existing null..................................");
                     Driver driver = new Driver
                     {
                         DriverName = yboRecord.DriverName,
-                        DriverLicense = yboRecord.DriverLicense,
                     };
+                    if (yboRecord.IsDefaultIdNumber())
+                    {
+                        driver.IDNumber = "စီစစ်ဆဲ";
+                    }
+                    else
+                    {
+                        driver.IDNumber = yboRecord.IDNumber;
+                    }
+                    if (yboRecord.IsDefaultLinenseNumber())
+                    {
+                        driver.DriverLicense = "စီစစ်ဆဲ";
+                    }
+                    else
+                    {
+                        driver.DriverLicense = yboRecord.DriverLicense;
+                    }
                     driver.VehicleData = vehicleData;
                     //_driverService.CreateDriver(driver);
                     yboRecord.Driver = driver;
@@ -184,6 +214,7 @@ namespace YBOInvestigation.Services.Impl
                 }
                 else
                 {
+                    Console.WriteLine("existing driver pkId..................." + existingDriver.DriverPkid);//21
                     yboRecord.Driver = existingDriver;
                     _logger.LogInformation(">>>>>>>>>> Create success YboRecord with existing driver.<<<<<<<<<<");
                     return Create(yboRecord);
@@ -194,7 +225,6 @@ namespace YBOInvestigation.Services.Impl
                 _logger.LogError(">>>>>>>>>> Error occur when creating new driver or edit old driver and create YBOInvestigationDept. <<<<<<<<<<" + e);
                 throw;
             }
-
         }
 
         public bool EditYboRecord(YboRecord yboRecord)
@@ -204,83 +234,44 @@ namespace YBOInvestigation.Services.Impl
             yboRecord.CreatedDate = DateTime.Now;
             yboRecord.CreatedBy = "admin";
             _logger.LogInformation(">>>>>>>>>> Parse integer driverPkId. <<<<<<<<<<");
-            try
+            
+            if (int.TryParse(yboRecord.DriverName, out int oldDriverPkId))
             {
-                if (int.TryParse(yboRecord.DriverName, out int oldDriverPkId))
-                {
-                    _logger.LogInformation(">>>>>>>>>> Success parse integer driverPkId. <<<<<<<<<<");
-                    try
-                    {
-                        _logger.LogInformation(">>>>>>>>>> Find driver by driverPkId and assign old drivername. <<<<<<<<<<");
-                        Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
-                        if (oldDriver != null)
-                        {
-                            yboRecord.DriverName = oldDriver.DriverName;
-                        }
-                        _logger.LogInformation(">>>>>>>>>> Success find driver by driverPkId and assign old drivername. <<<<<<<<<<");
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(">>>>>>>>>> Error occur when finding driver by driverPkId and assign old drivername. <<<<<<<<<<" + e);
-                        throw;
-                    }
-                }
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                _logger.LogInformation(">>>>>>>>>> Success find driver by driverPkId and assign old drivername. <<<<<<<<<<");
+                yboRecord.Driver = oldDriver;
+                Update(yboRecord);
+                return true;
             }
-            catch (Exception e)
+            VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yboRecord.VehicleNumber);
+            Console.WriteLine("yborecserviceimpl idNumber................" + yboRecord.IDNumber);
+            Console.WriteLine("yborecserviceimpl license................" + yboRecord.DriverLicense);
+            Console.WriteLine("yborecserviceimpl vehicleId................" + vehicleData.VehicleDataPkid);
+            Driver existingDriver = _driverService.FindDriverByIdNumberAndLicenseAndVehicle(yboRecord.IDNumber, yboRecord.DriverLicense, vehicleData.VehicleDataPkid);
+            Console.WriteLine("existing driver null? ..............." + (existingDriver == null));
+            if(existingDriver != null)
             {
-                _logger.LogError(">>>>>>>>>> Error occur when parseing driver. <<<<<<<<<<" + e);
-                throw;
-            }
-            Driver existingDriver = null;
-            _logger.LogInformation(">>>>>>>>>> Get driver by driverLicense. <<<<<<<<<<");
-            try
-            {
-                _logger.LogInformation(">>>>>>>>>> Success Get driver by driverLicense. <<<<<<<<<<");
-                existingDriver = _driverService.FindDriverByLicense(yboRecord.DriverLicense);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(">>>>>>>>>> Error occur when getting driver by driverLicense <<<<<<<<<<" + e);
-                throw;
-            }
-            try
-            {
-                _logger.LogInformation(">>>>>>>>>> Create new driver or edit old driver and edit YboRecord. <<<<<<<<<<");
-                if (existingDriver == null)
-                {
+                Console.WriteLine("existing driver not null.................." + existingDriver.DriverPkid);
+                existingDriver.IDNumber = yboRecord.IDNumber;
+                existingDriver.DriverName = yboRecord.DriverName;
+                existingDriver.DriverLicense = yboRecord.DriverLicense;
+                _driverService.EditDriver(existingDriver);
+                Console.WriteLine("before insert driver.............." + yboRecord.Driver.DriverPkid);
 
-                    VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yboRecord.VehicleNumber);
-
-                    Driver driver = new Driver
-                    {
-                        DriverName = yboRecord.DriverName,
-                        DriverLicense = yboRecord.DriverLicense,
-                    };
-
-                    driver.VehicleData = vehicleData;
-                    _driverService.CreateDriver(driver);
-                    yboRecord.Driver = driver;
-                    _logger.LogInformation(">>>>>>>>>> Edit success YboRecord with new driver. <<<<<<<<<<");
-                    return Update(yboRecord);
-
-                }
-                else
-                {
-                    Console.WriteLine("here exit driver not null...");
-                    existingDriver.DriverName = yboRecord.DriverName;
-                    existingDriver.DriverLicense = yboRecord.DriverLicense;
-                    //existingDriver.VehicleNumber = yboRecord.VehicleNumber;
-                    _driverService.EditDriver(existingDriver);
-                    yboRecord.Driver = existingDriver;
-                    _logger.LogInformation(">>>>>>>>>> Edit success YboRecord with existing driver.<<<<<<<<<<");
-                    return Update(yboRecord);
-                }
+                yboRecord.Driver = existingDriver;
+                Console.WriteLine("After insert driver.............." + yboRecord.Driver.DriverPkid);
+                return Update(yboRecord);
             }
-            catch (Exception e)
-            {
-                _logger.LogError(">>>>>>>>>> Error occur when creating new driver or edit old driver and create YboRecord. <<<<<<<<<<" + e);
-                throw;
-            }
+            Console.WriteLine("Here existing null: ................");
+            Driver currentDriver = _driverService.FindDriverById(yboRecord.Driver.DriverPkid);
+            Console.WriteLine("Current driver..................." + currentDriver.DriverPkid);
+            currentDriver.IDNumber = yboRecord.IDNumber;
+            currentDriver.DriverLicense = yboRecord.DriverLicense;
+            currentDriver.DriverName = yboRecord.DriverName;
+            _driverService.EditDriver(currentDriver);
+            yboRecord.Driver = currentDriver;
+            _logger.LogInformation(">>>>>>>>>> Edit success specialEventInvestigationDept with existing driver.<<<<<<<<<<");
+            return Update(yboRecord);
         }
 
         public bool DeleteYboRecord(YboRecord yboRecord)
@@ -341,7 +332,6 @@ namespace YBOInvestigation.Services.Impl
             dt.Columns.AddRange(new DataColumn[13] {
                                         new DataColumn("ဖမ်းဆီးရက်စွဲ"),
                                         new DataColumn("ဖမ်းဆီးသည့်အချိန်"),
-                                        new DataColumn("အကြိမ်အရေအတွက်"),
                                         new DataColumn("ဖုန်းနံပါတ်"),
                                         new DataColumn("သတင်းပေးပို့သူ"),
                                         new DataColumn("တိုင်ကြားသည့်အကြောင်းအရာ"),
@@ -350,6 +340,7 @@ namespace YBOInvestigation.Services.Impl
                                         new DataColumn("ယာဥ်မောင်းအမည်"),
                                         new DataColumn("ယာဥ်အမှတ်"),
                                         new DataColumn("လိုင်စင်အမှတ်"),
+                                        new DataColumn("ID Number"),
                                         new DataColumn("YBS Company Name"),
                                         new DataColumn("ယာဥ်လိုင်း"),
                                         });
@@ -391,7 +382,7 @@ namespace YBOInvestigation.Services.Impl
                 {
                     foreach (var yboRecord in list)
                     {
-                        dt.Rows.Add(yboRecord.RecordDate, yboRecord.TotalRecord, yboRecord.Phone, yboRecord.YbsRecordSender, yboRecord.RecordDescription, yboRecord.CompletionStatus, yboRecord.ChallanNumber, yboRecord.CompletedDate, yboRecord.Driver.DriverName, yboRecord.Driver.VehicleData.VehicleNumber, yboRecord.Driver.DriverLicense, yboRecord.YBSCompany.YBSCompanyName, yboRecord.YBSType.YBSTypeName);
+                        dt.Rows.Add(yboRecord.RecordDate, yboRecord.Phone, yboRecord.YbsRecordSender, yboRecord.RecordDescription, yboRecord.CompletionStatus, yboRecord.ChallanNumber, yboRecord.CompletedDate, yboRecord.Driver.DriverName, yboRecord.Driver.VehicleData.VehicleNumber, yboRecord.Driver.DriverLicense, yboRecord.Driver.IDNumber, yboRecord.YBSCompany.YBSCompanyName, yboRecord.YBSType.YBSTypeName);
                     }
                 }
                 _logger.LogInformation(">>>>>>>>>> Assign list to dataTable success. <<<<<<<<<<");
@@ -400,6 +391,24 @@ namespace YBOInvestigation.Services.Impl
             catch (Exception e)
             {
                 _logger.LogError(">>>>>>>>>> Error occur when assigning SearchAll or GetAll YboRecord list to dataTable. <<<<<<<<<<" + e);
+                throw;
+            }
+        }
+
+        public int GetTotalRecordByDriver(int driverPkId)
+        {
+            _logger.LogInformation(">>>>>>>>>> [YboRecords][FindCallCenterInvestigationDeptByIdEgerLoad] Find CallCenterInvestigationDept by pkId with eger load <<<<<<<<<<");
+            try
+            {
+                _logger.LogInformation(">>>>>>>>>> Success find YboRecords by pkId with eger load.<<<<<<<<<<");
+                int TotalRecord = _context.YboRecords.Count(record => record.DriverPkid == driverPkId);
+                if (TotalRecord == 0)
+                    return 1;
+                return TotalRecord;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(">>>>>>>>>> Error occur when finding YboRecords by pkId with eger load. <<<<<<<<<<" + e);
                 throw;
             }
         }

@@ -13,5 +13,6 @@ namespace YBOInvestigation.Services
         TrafficControlCenterInvestigationDept FindTrafficControlCenterInvestigationDeptByIdEgerLoad(int id);
         bool EditTrafficControlCenterInvestigationDept(TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept);
         DataTable MakeTrafficControlCenterInvestigationDeptExcelData(PagingList<TrafficControlCenterInvestigationDept> trafficControlCenterInvestigationDepts, bool exportAll);
+        public int GetTotalRecordByDriver(int driverPkId);
     }
 }

@@ -9,12 +9,12 @@ namespace YBOInvestigation.Models
         public int YBSTypePkid { get; set; }
 
         [StringLength(50)]
-        public string YBSTypeName { get; set; }
+        public string? YBSTypeName { get; set; }
 
         [ForeignKey("YBSCompany")]
         public int YBSCompanyPkid { get; set; }
         public virtual YBSCompany YBSCompany { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool? IsDeleted { get; set; }
 
     }
 }

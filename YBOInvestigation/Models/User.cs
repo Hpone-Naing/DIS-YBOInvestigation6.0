@@ -18,7 +18,7 @@ namespace YBOInvestigation.Models
 
         [Required(ErrorMessage = "Display Name is required")]
         [StringLength(50, ErrorMessage = "Display Name must be at most 50 characters")]
-        public string DisplayName { get; set; }
+        public string? DisplayName { get; set; }
 
         [ForeignKey("UserType"), DisplayName("UserType")]
         public int UserTypeID { get; set; }

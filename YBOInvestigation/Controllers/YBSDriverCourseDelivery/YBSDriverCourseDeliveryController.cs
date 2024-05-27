@@ -100,13 +100,34 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
                 .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
                 .ToList();
         }
-        public IActionResult Create(int vehicleId)
+
+        private void AddViewBag(int vehicleId = 0, int driverId = 0)
+        {
+            VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdContainSoftDeleteEgerLoad(vehicleId);
+            List<Driver> drivers = _serviceFactory.CreateDriverService().GetDriversByVehicleDataId(vehicleData.VehicleDataPkid).Where(driver => driver.VehicleData.VehicleNumber == vehicleData.VehicleNumber).ToList();
+            List<PunishmentType> punishmentTypes = _serviceFactory.CreatePunishmentTypeService().GetUniquePunishmentTypes();
+            if (driverId > 0)
+            {
+                ViewBag.TotalRecord = _serviceFactory.CreateYBSDriverCourseDeliveryService().GetTotalRecordByDriver(driverId);
+                ViewBag.ChooseDriver = drivers.Where(driver => driver.DriverPkid == driverId).FirstOrDefault();
+            }
+            ViewBag.YBSCompany = _serviceFactory.CreateYBSCompanyService().FindYBSCompanyById(vehicleData.YBSCompany.YBSCompanyPkid);//.GetSelectListYBSCompanys();
+            ViewBag.YBSType = _serviceFactory.CreateYBSTypeService().FindYBSTypeById(vehicleData.YBSType.YBSTypePkid);
+            ViewBag.PunishmentTypes = _serviceFactory.CreatePunishmentTypeService().GetPunishmentTypeSelectList(punishmentTypes, "PunishmentTypePkid", "Punishment");
+            ViewBag.VehicleNumber = vehicleData.VehicleNumber;
+            ViewBag.AutoComplete = drivers
+                .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
+                .ToList();
+        }
+
+        
+        public IActionResult Create(int vehicleId, int driverId)
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
             try
             {
-                AddViewBag(vehicleId);
+                AddViewBag(vehicleId, driverId);
                 return View();
             }
             catch (Exception e)
@@ -123,10 +144,16 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
+            Driver driver = _serviceFactory.CreateDriverService().IsExistingDriver(ybsDriverCourseDelivery.IDNumber, ybsDriverCourseDelivery.DriverLicense);
+            if (driver != null)
+            {
+                String message = "Driver  " + driver.DriverName + " License " + driver.DriverLicense + "  ID Number " + driver.IDNumber + " exit in database.\n but your data entry is ID Number: " + ybsDriverCourseDelivery.IDNumber + " License Number: " + ybsDriverCourseDelivery.DriverLicense + ". Are you wrong data entry?";
+                Utility.AlertMessage(this, message, "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            ybsDriverCourseDelivery.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
+            ybsDriverCourseDelivery.DriverName = (!string.IsNullOrEmpty(selectedOldDriverId) && selectedOldDriverId != "0") ? selectedOldDriverId : newDriverName;
             try
             {
                 if (_serviceFactory.CreateYBSDriverCourseDeliveryService().CreateYBSDriverCourseDeliveries(ybsDriverCourseDelivery))
@@ -157,6 +184,8 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             {
                 YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
                 AddViewBag(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
+                ViewBag.TotalRecord = _serviceFactory.CreateYBSDriverCourseDeliveryService().GetTotalRecordByDriver(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverPkid);
+
                 return View(ybsDriverCourseDelivery);
             }
             catch (Exception e)
@@ -174,6 +203,7 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             try
             {
                 YBSDriverCourseDelivery ybsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(Id);
+                ybsDriverCourseDelivery.TotalRecord = _serviceFactory.CreateYBSDriverCourseDeliveryService().GetTotalRecordByDriver(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverPkid);
                 return View(ybsDriverCourseDelivery);
             }
             catch (Exception e)
@@ -205,6 +235,8 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
                 {
                     YBSDriverCourseDelivery oldYbsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid);
                     AddViewBag(oldYbsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
+                    ViewBag.TotalRecord = _serviceFactory.CreateYBSDriverCourseDeliveryService().GetTotalRecordByDriver(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverPkid);
+
                     Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                     return View(oldYbsDriverCourseDelivery);
                 }
@@ -213,6 +245,8 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
             {
                 YBSDriverCourseDelivery oldYbsDriverCourseDelivery = _serviceFactory.CreateYBSDriverCourseDeliveryService().FindYBSDriverCourseDeliveriesByIdEgerLoad(ybsDriverCourseDelivery.YBSDriverCourseDeliveryPkid);
                 AddViewBag(oldYbsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleDataPkid);
+                ViewBag.TotalRecord = _serviceFactory.CreateYBSDriverCourseDeliveryService().GetTotalRecordByDriver(ybsDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverPkid);
+
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                 return View(oldYbsDriverCourseDelivery);
             }
@@ -255,10 +289,15 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
         public JsonResult GetDriverInfoByDriverId(int driverPkId)
         {
             TrainedYBSDriverInfo trainedDriverInfo = _serviceFactory.CreateTrainedYBSDriverInfoService().GetTrainedYBSDriverInfoByDriverIdEgerLoad(driverPkId);
-            string license = _serviceFactory.CreateDriverService().FindDriverById(driverPkId).DriverLicense;
+            Driver driver = _serviceFactory.CreateDriverService().FindDriverById(driverPkId);
+            string license = driver.DriverLicense;
+            string idNumber = driver.IDNumber;
+            int totalRecord = _serviceFactory.CreateYBSDriverCourseDeliveryService().GetTotalRecordByDriver(driverPkId);
             var result = new
             {
+                totalRecord = totalRecord,
                 license = license,
+                idNumber = idNumber,
                 trainedDriverInfo = trainedDriverInfo
             };
             return Json(result);

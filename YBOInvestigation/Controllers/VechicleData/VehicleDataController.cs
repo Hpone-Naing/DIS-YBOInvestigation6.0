@@ -33,13 +33,13 @@ namespace YBOInvestigation.Controllers.VechicleData
 
             int pageSize = Utility.DEFAULT_PAGINATION_NUMBER;
             AddSearchDatasToViewBag(searchString, searchOption);
-            List<VehicleData> vehicleDatas = _serviceFactory.CreateVehicleDataService().GetAllVehiclesWithPagin(searchString, advanceSearch, pageNo, pageSize, searchOption);
+            PagingList<DriverPunishmentInfo> driverPunishmentInfos = _serviceFactory.CreateVehicleDataService().GetAllDriverPunishmentInfoWithPagin(searchString, advanceSearch, pageNo, pageSize, searchOption);
             ViewBag.AutoComplete = _serviceFactory.CreateVehicleDataService().GetAllVehicles()
                 .Select(vehicle => new { VehicleNumber = vehicle.VehicleNumber, YBSTypeName = vehicle.YBSType.YBSTypeName })
                 .ToList();
             if (string.IsNullOrEmpty(searchString))
                 return View();
-            return View(vehicleDatas);
+            return View(driverPunishmentInfos);
         }
 
         
@@ -85,16 +85,16 @@ namespace YBOInvestigation.Controllers.VechicleData
             ViewBag.YBSTypes = _serviceFactory.CreateYBSTypeService().GetSelectListYBSTypesByYBSCompanyId();//GetItemsFromList(uniqueYBSTypes, "YBSTypePkid", "YBSTypeName");
         }
         
-        public IActionResult Details(int Id)
+        public IActionResult Details(int vehicleId, int driverId)
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
             try
             {
-                VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdEgerLoad(Id);
-                if (vehicleData != null)
+                DriverPunishmentInfo driverPunishmentInfo = _serviceFactory.CreateVehicleDataService().FindDriverPunshmentInfoByIdEgerLoad(vehicleId, driverId);
+                if (driverPunishmentInfo != null)
                 {
-                    return View(vehicleData);
+                    return View(driverPunishmentInfo);
                 }
                 else
                 {

@@ -13,5 +13,6 @@ namespace YBOInvestigation.Services
         YBSDriverCourseDelivery FindYBSDriverCourseDeliveriesByIdEgerLoad(int id);
         bool EditYBSDriverCourseDeliveries(YBSDriverCourseDelivery yBSDriverCourseDelivery);
         DataTable MakeYBSDriverCourseDeliveriesExcelData(PagingList<YBSDriverCourseDelivery> yBSDriverCourseDeliverys, bool exportAll);
+        public int GetTotalRecordByDriver(int driverPkId);
     }
 }

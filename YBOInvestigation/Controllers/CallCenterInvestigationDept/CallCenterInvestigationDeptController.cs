@@ -68,7 +68,6 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
                         }
                     }
 
-
                 }
                 return View(callCenterInvestigationDepts);
             }
@@ -87,25 +86,41 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
 
         private void AddViewBag(int vehicleId = 0)
         {
-            Console.WriteLine("vehicle id: " + vehicleId);
             VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdContainSoftDeleteEgerLoad(vehicleId);
-            Console.WriteLine("VehicleData pkid: " + vehicleData.VehicleTypePkid);
-            Console.WriteLine("VehicleData vehicleno: " + vehicleData.VehicleNumber);
             List<Driver> drivers = _serviceFactory.CreateDriverService().GetDriversByVehicleDataId(vehicleData.VehicleDataPkid).Where(driver => driver.VehicleData.VehicleNumber == vehicleData.VehicleNumber).ToList();
+            ViewBag.YBSCompany = _serviceFactory.CreateYBSCompanyService().FindYBSCompanyById(vehicleData.YBSCompany.YBSCompanyPkid);//.GetSelectListYBSCompanys();
+            ViewBag.YBSType = _serviceFactory.CreateYBSTypeService().FindYBSTypeById(vehicleData.YBSType.YBSTypePkid);//.GetSelectListYBSTypesByYBSCompanyId(vehicleData.YBSCompany.YBSCompanyPkid);
+            ViewBag.VehicleNumber = vehicleData.VehicleNumber;
+            
+            ViewBag.AutoComplete = drivers
+                .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
+                .ToList();
+        }
+
+        private void AddViewBag(int vehicleId = 0, int driverId =0)
+        {
+            VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdContainSoftDeleteEgerLoad(vehicleId);
+            List<Driver> drivers = _serviceFactory.CreateDriverService().GetDriversByVehicleDataId(vehicleData.VehicleDataPkid).Where(driver => driver.VehicleData.VehicleNumber == vehicleData.VehicleNumber).ToList();
+            if(driverId > 0)
+            {
+                ViewBag.TotalRecord = _serviceFactory.CreateCallCenterInvestigationDeptService().GetTotalRecordByDriver(driverId);
+                ViewBag.ChooseDriver = drivers.Where(driver => driver.DriverPkid == driverId).FirstOrDefault();
+            }
             ViewBag.YBSCompany = _serviceFactory.CreateYBSCompanyService().FindYBSCompanyById(vehicleData.YBSCompany.YBSCompanyPkid);//.GetSelectListYBSCompanys();
             ViewBag.YBSType = _serviceFactory.CreateYBSTypeService().FindYBSTypeById(vehicleData.YBSType.YBSTypePkid);//.GetSelectListYBSTypesByYBSCompanyId(vehicleData.YBSCompany.YBSCompanyPkid);
             ViewBag.VehicleNumber = vehicleData.VehicleNumber;
             ViewBag.AutoComplete = drivers
                 .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
                 .ToList();
+            
         }
-        public IActionResult Create(int vehicleId)
+        public IActionResult Create(int vehicleId, int driverId)
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
             try
             {
-                AddViewBag(vehicleId);
+                AddViewBag(vehicleId, driverId);
                 return View();
             }
             catch (Exception e)
@@ -121,10 +136,16 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
+            Driver driver = _serviceFactory.CreateDriverService().IsExistingDriver(callCenterInvestigationDept.IDNumber, callCenterInvestigationDept.DriverLicense);
+            if (driver != null)
+            {
+                String message = "Driver  " + driver.DriverName + " License " + driver.DriverLicense + "  ID Number " + driver.IDNumber + " exit in database.\n but your data entry is ID Number: " + callCenterInvestigationDept.IDNumber + " License Number: " + callCenterInvestigationDept.DriverLicense + ". Are you wrong data entry?";
+                Utility.AlertMessage(this, message, "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            callCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
+            callCenterInvestigationDept.DriverName = (!string.IsNullOrEmpty(selectedDriverName) && selectedDriverName != "0")? selectedDriverName : newDriverName;
             
             try
             {
@@ -152,11 +173,12 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             Console.WriteLine("here id:" + Id);
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
+            
             try
             {
                 CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
                 AddViewBag(callCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                ViewBag.TotalRecord = _serviceFactory.CreateCallCenterInvestigationDeptService().GetTotalRecordByDriver(callCenterInvestigationDept.Driver.DriverPkid);
                 return View(callCenterInvestigationDept);
             }
             catch (Exception e)
@@ -175,6 +197,7 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             try
             { 
                 CallCenterInvestigationDept callCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(Id);
+                callCenterInvestigationDept.TotalRecord = _serviceFactory.CreateCallCenterInvestigationDeptService().GetTotalRecordByDriver(callCenterInvestigationDept.Driver.DriverPkid);
                 return View(callCenterInvestigationDept);
             }
             catch (Exception e)
@@ -190,10 +213,17 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-            
+
+            Driver driver = _serviceFactory.CreateDriverService().IsExistingDriver(callCenterInvestigationDept.IDNumber, callCenterInvestigationDept.DriverLicense);
+            if (driver != null)
+            {
+                String message = "Driver  " + driver.DriverName + " License " + driver.DriverLicense + "  ID Number " + driver.IDNumber + " exit in database.\n but your data entry is ID Number: " + callCenterInvestigationDept.IDNumber + " License Number: " + callCenterInvestigationDept.DriverLicense + ". Are you wrong data entry?";
+                Utility.AlertMessage(this, message, "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
+
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-
             callCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
 
             try
@@ -208,6 +238,7 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
                 {
                     CallCenterInvestigationDept oldCallCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(callCenterInvestigationDept.CallCenterInvestigationDeptPkid);
                     AddViewBag(oldCallCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                    ViewBag.TotalRecord = _serviceFactory.CreateCallCenterInvestigationDeptService().GetTotalRecordByDriver(callCenterInvestigationDept.Driver.DriverPkid);
                     Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                     return View(oldCallCenterInvestigationDept);
                 }
@@ -216,6 +247,7 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
             {
                 CallCenterInvestigationDept oldCallCenterInvestigationDept = _serviceFactory.CreateCallCenterInvestigationDeptService().FindCallCenterInvestigationDeptByIdEgerLoad(callCenterInvestigationDept.CallCenterInvestigationDeptPkid);
                 AddViewBag(oldCallCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                ViewBag.TotalRecord = _serviceFactory.CreateCallCenterInvestigationDeptService().GetTotalRecordByDriver(callCenterInvestigationDept.Driver.DriverPkid);
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                 return View(oldCallCenterInvestigationDept);
             }
@@ -261,6 +293,21 @@ namespace YBOInvestigation.Controllers.CallCenterInvestigationDeptController
         {
             string license = _serviceFactory.CreateDriverService().FindDriverLicenseByDriverName(driverName);
             return Json(license);
+        }
+
+        public JsonResult GetDriverLicenseByDriverId(int driverPkId)
+        {
+            Driver driver = _serviceFactory.CreateDriverService().FindDriverById(driverPkId);
+            string license = driver.DriverLicense;
+            string idNumber = driver.IDNumber;
+            int totalRecord = _serviceFactory.CreateCallCenterInvestigationDeptService().GetTotalRecordByDriver(driverPkId);
+            var result = new
+            {
+                license = license,
+                idNumber = idNumber,
+                totalRecord = totalRecord
+            };
+            return Json(result);
         }
     }
 }

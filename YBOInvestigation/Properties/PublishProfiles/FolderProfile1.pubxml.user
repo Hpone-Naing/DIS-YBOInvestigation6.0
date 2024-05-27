@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>D:\DIS Company\host</_PublishTargetUrl>
+    <History>True|2024-01-23T15:33:43.3470704Z;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="YBOInvestigationManagementDBContext">
+      <Value>Server=203.81.89.218%3bDatabase=YRTC_HRAndManagement%3bUser Id=yrtcadmin%3bPassword=yrtc%40dmin123%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

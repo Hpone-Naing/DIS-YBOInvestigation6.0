@@ -28,6 +28,7 @@ namespace YBOInvestigation.Controllers.Auth
                 if (loginUser != null)
                 {
                     string hashedEnteredPassword = HashUtil.ComputeSHA256Hash(user.Password);
+                    Console.WriteLine("Enter hashedPwd: " + hashedEnteredPassword);
                     if (loginUser.IsAuthenticateUser(hashedEnteredPassword))
                     {
                         bool isRememberMe = Request.Form["RememberMe"] == "true";

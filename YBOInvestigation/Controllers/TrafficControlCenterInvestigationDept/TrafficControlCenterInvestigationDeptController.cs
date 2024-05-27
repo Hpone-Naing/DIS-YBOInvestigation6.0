@@ -89,20 +89,41 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
         {
             VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdContainSoftDeleteEgerLoad(vehicleId);
             List<Driver> drivers = _serviceFactory.CreateDriverService().GetDriversByVehicleDataId(vehicleData.VehicleDataPkid).Where(driver => driver.VehicleData.VehicleNumber == vehicleData.VehicleNumber).ToList();
+            List<PunishmentType> punishmentTypes = _serviceFactory.CreatePunishmentTypeService().GetUniquePunishmentTypes();
             ViewBag.YBSCompany = _serviceFactory.CreateYBSCompanyService().FindYBSCompanyById(vehicleData.YBSCompany.YBSCompanyPkid);//.GetSelectListYBSCompanys();
             ViewBag.YBSType = _serviceFactory.CreateYBSTypeService().FindYBSTypeById(vehicleData.YBSType.YBSTypePkid);//.GetSelectListYBSTypesByYBSCompanyId(vehicleData.YBSCompany.YBSCompanyPkid);
+            ViewBag.PunishmentTypes = _serviceFactory.CreatePunishmentTypeService().GetPunishmentTypeSelectList(punishmentTypes, "PunishmentTypePkid", "Punishment");
             ViewBag.VehicleNumber = vehicleData.VehicleNumber;
             ViewBag.AutoComplete = drivers
                 .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
                 .ToList();
         }
-        public IActionResult Create(int vehicleId)
+
+        private void AddViewBag(int vehicleId = 0, int driverId=0)
+        {
+            VehicleData vehicleData = _serviceFactory.CreateVehicleDataService().FindVehicleDataByIdContainSoftDeleteEgerLoad(vehicleId);
+            List<Driver> drivers = _serviceFactory.CreateDriverService().GetDriversByVehicleDataId(vehicleData.VehicleDataPkid).Where(driver => driver.VehicleData.VehicleNumber == vehicleData.VehicleNumber).ToList();
+            if (driverId > 0)
+            {
+                ViewBag.TotalRecord = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().GetTotalRecordByDriver(driverId);
+                ViewBag.ChooseDriver = drivers.Where(driver => driver.DriverPkid == driverId).FirstOrDefault();
+            }
+            List<PunishmentType> punishmentTypes = _serviceFactory.CreatePunishmentTypeService().GetUniquePunishmentTypes();
+            ViewBag.YBSCompany = _serviceFactory.CreateYBSCompanyService().FindYBSCompanyById(vehicleData.YBSCompany.YBSCompanyPkid);//.GetSelectListYBSCompanys();
+            ViewBag.YBSType = _serviceFactory.CreateYBSTypeService().FindYBSTypeById(vehicleData.YBSType.YBSTypePkid);//.GetSelectListYBSTypesByYBSCompanyId(vehicleData.YBSCompany.YBSCompanyPkid);
+            ViewBag.PunishmentTypes = _serviceFactory.CreatePunishmentTypeService().GetPunishmentTypeSelectList(punishmentTypes, "PunishmentTypePkid", "Punishment");
+            ViewBag.VehicleNumber = vehicleData.VehicleNumber;
+            ViewBag.AutoComplete = drivers
+                .Select(driver => new { DriverPkId = driver.DriverPkid, DriverName = driver.DriverName, DriverLicense = driver.DriverLicense })
+                .ToList();
+        }
+        public IActionResult Create(int vehicleId, int driverId)
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
             try
             {
-                AddViewBag(vehicleId);
+                AddViewBag(vehicleId, driverId);
                 return View();
             }
             catch (Exception e)
@@ -119,9 +140,16 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
 
+            Driver driver = _serviceFactory.CreateDriverService().IsExistingDriver(trafficControlCenterInvestigationDept.IDNumber, trafficControlCenterInvestigationDept.DriverLicense);
+            if (driver != null)
+            {
+                String message = "Driver  " + driver.DriverName + " License " + driver.DriverLicense + "  ID Number " + driver.IDNumber + " exit in database.\n but your data entry is ID Number: " + trafficControlCenterInvestigationDept.IDNumber + " License Number: " + trafficControlCenterInvestigationDept.DriverLicense + ". Are you wrong data entry?";
+                Utility.AlertMessage(this, message, "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            trafficControlCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
+            trafficControlCenterInvestigationDept.DriverName = (!string.IsNullOrEmpty(selectedDriverName) && selectedDriverName != "0") ? selectedDriverName : newDriverName;
             try
             {
                 if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().CreateTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))
@@ -151,6 +179,7 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             {
                 TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
                 AddViewBag(trafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                ViewBag.TotalRecord = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().GetTotalRecordByDriver(trafficControlCenterInvestigationDept.Driver.DriverPkid);
                 return View(trafficControlCenterInvestigationDept);
             }
             catch (Exception e)
@@ -168,6 +197,8 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             try
             {
                 TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(Id);
+                trafficControlCenterInvestigationDept.TotalRecord = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().GetTotalRecordByDriver(trafficControlCenterInvestigationDept.Driver.DriverPkid);
+
                 return View(trafficControlCenterInvestigationDept);
             }
             catch (Exception e)
@@ -183,7 +214,13 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
         {
             if (!SessionUtil.IsActiveSession(HttpContext))
                 return RedirectToAction("Index", "Login");
-
+            Driver driver = _serviceFactory.CreateDriverService().IsExistingDriver(trafficControlCenterInvestigationDept.IDNumber, trafficControlCenterInvestigationDept.DriverLicense);
+            if (driver != null)
+            {
+                String message = "Driver  " + driver.DriverName + " License " + driver.DriverLicense + "  ID Number " + driver.IDNumber + " exit in database.\n but your data entry is ID Number: " + trafficControlCenterInvestigationDept.IDNumber + " License Number: " + trafficControlCenterInvestigationDept.DriverLicense + ". Are you wrong data entry?";
+                Utility.AlertMessage(this, message, "alert-danger");
+                return RedirectToAction(nameof(List));
+            }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
             trafficControlCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
@@ -200,6 +237,7 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
                     Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                     TrafficControlCenterInvestigationDept oldTrafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid);
                     AddViewBag(oldTrafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                    ViewBag.TotalRecord = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().GetTotalRecordByDriver(trafficControlCenterInvestigationDept.Driver.DriverPkid);
                     return View(trafficControlCenterInvestigationDept);
                 }
             }
@@ -208,6 +246,7 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
                 Utility.AlertMessage(this, "Edit Fail.Internal Server Error", "alert-danger");
                 TrafficControlCenterInvestigationDept oldTrafficControlCenterInvestigationDept = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().FindTrafficControlCenterInvestigationDeptByIdEgerLoad(trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid);
                 AddViewBag(oldTrafficControlCenterInvestigationDept.Driver.VehicleData.VehicleDataPkid);
+                ViewBag.TotalRecord = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().GetTotalRecordByDriver(trafficControlCenterInvestigationDept.Driver.DriverPkid);
                 return View(oldTrafficControlCenterInvestigationDept);
             }
         }
@@ -252,6 +291,21 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
         {
             string license = _serviceFactory.CreateDriverService().FindDriverLicenseByDriverName(driverName);
             return Json(license);
+        }
+
+        public JsonResult GetDriverLicenseByDriverId(int driverPkId)
+        {
+            Driver driver = _serviceFactory.CreateDriverService().FindDriverById(driverPkId);
+            string license = driver.DriverLicense;
+            string idNumber = driver.IDNumber;
+            int totalRecord = _serviceFactory.CreateTrafficControlCenterInvestigationDeptService().GetTotalRecordByDriver(driverPkId);
+            var result = new
+            {
+                license = license,
+                idNumber = idNumber,
+                totalRecord = totalRecord
+            };
+            return Json(result);
         }
     }
 }

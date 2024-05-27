@@ -26,7 +26,9 @@ namespace YBOInvestigation.Services.Impl
             try
             {
                 _logger.LogInformation($">>>>>>>>>> Retrieve CallCenterInvestigationDept List success. <<<<<<<<<<");
-                return GetAll().Where(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.IsDeleted == false).ToList();
+                return GetAll()
+                    .OrderByDescending(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.CreatedDate)
+                    .Where(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.IsDeleted == false).ToList();
             }
             catch (Exception e)
             {
@@ -45,8 +47,10 @@ namespace YBOInvestigation.Services.Impl
                     .Where(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.IsDeleted == false)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSCompany)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSType)
+                            .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.PunishmentType)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver.VehicleData)
+                            .OrderByDescending(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.CreatedDate)
                             .ToList();
             }
             catch (Exception e)
@@ -72,14 +76,18 @@ namespace YBOInvestigation.Services.Impl
                     .Where(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.IsDeleted == false)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSCompany)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSType)
+                            .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.PunishmentType)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver.VehicleData)
-                            .ToList()
+                            .AsEnumerable()
                             .Where(trafficControlCenterInvestigationDept => IsSearchDataContained(trafficControlCenterInvestigationDept, searchString)
                             || IsSearchDataContained(trafficControlCenterInvestigationDept.YBSCompany, searchString)
                             || IsSearchDataContained(trafficControlCenterInvestigationDept.YBSType, searchString)
                             || IsSearchDataContained(trafficControlCenterInvestigationDept.Driver, searchString)
-                            ).AsQueryable().ToList();
+                            || IsSearchDataContained(trafficControlCenterInvestigationDept.PunishmentType, searchString)
+                            )
+                            .OrderByDescending(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.CreatedDate)
+                            .ToList();
                     }
                     catch (Exception e)
                     {
@@ -97,8 +105,10 @@ namespace YBOInvestigation.Services.Impl
                     .Where(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.IsDeleted == false)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSCompany)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSType)
+                            .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.PunishmentType)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver)
                             .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver.VehicleData)
+                            .OrderByDescending(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.CreatedDate)
                             .ToList();
                     }
                     catch (Exception e)
@@ -140,6 +150,10 @@ namespace YBOInvestigation.Services.Impl
                         {
                             trafficControlCenterInvestigationDept.DriverName = oldDriver.DriverName;
                         }
+                        else
+                        {
+                            trafficControlCenterInvestigationDept.DriverName = "စီစစ်ဆဲ";
+                        }
                         _logger.LogInformation(">>>>>>>>>> Success find driver by driverPkId and assign old drivername. <<<<<<<<<<");
                     }
                     catch (Exception e)
@@ -154,13 +168,16 @@ namespace YBOInvestigation.Services.Impl
                 _logger.LogError(">>>>>>>>>> Error occur when parseing driver. <<<<<<<<<<" + e);
                 throw;
             }
-
+            VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(trafficControlCenterInvestigationDept.VehicleNumber);
             Driver existingDriver = null;
             _logger.LogInformation(">>>>>>>>>> Get driver by driverLicense. <<<<<<<<<<");
             try
             {
                 _logger.LogInformation(">>>>>>>>>> Success Get driver by driverLicense. <<<<<<<<<<");
-                existingDriver = _driverService.FindDriverByLicense(trafficControlCenterInvestigationDept.DriverLicense);
+                
+                    existingDriver = _driverService.FindDriverByIdNumberAndLicenseAndVehicle(trafficControlCenterInvestigationDept.IDNumber, trafficControlCenterInvestigationDept.DriverLicense, vehicleData.VehicleDataPkid);
+                
+                
             }
             catch (Exception e)
             {
@@ -173,12 +190,26 @@ namespace YBOInvestigation.Services.Impl
 
                 if (existingDriver == null)
                 {
-                    VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(trafficControlCenterInvestigationDept.VehicleNumber);
                     Driver driver = new Driver
                     {
                         DriverName = trafficControlCenterInvestigationDept.DriverName,
-                        DriverLicense = trafficControlCenterInvestigationDept.DriverLicense,
                     };
+                    if (trafficControlCenterInvestigationDept.IsDefaultIdNumber())
+                    {
+                        driver.IDNumber = "စီစစ်ဆဲ";
+                    }
+                    else
+                    {
+                        driver.IDNumber = trafficControlCenterInvestigationDept.IDNumber;
+                    }
+                    if (trafficControlCenterInvestigationDept.IsDefaultLinenseNumber())
+                    {
+                        driver.DriverLicense = "စီစစ်ဆဲ";
+                    }
+                    else
+                    {
+                        driver.DriverLicense = trafficControlCenterInvestigationDept.DriverLicense;
+                    }
                     driver.VehicleData = vehicleData;
                     //_driverService.CreateDriver(driver);
                     trafficControlCenterInvestigationDept.Driver = driver;
@@ -206,79 +237,36 @@ namespace YBOInvestigation.Services.Impl
             trafficControlCenterInvestigationDept.CreatedDate = DateTime.Now;
             trafficControlCenterInvestigationDept.CreatedBy = "admin";
             _logger.LogInformation(">>>>>>>>>> Parse integer driverPkId. <<<<<<<<<<");
-            try
-            {
+
                 if (int.TryParse(trafficControlCenterInvestigationDept.DriverName, out int oldDriverPkId))
                 {
-                    _logger.LogInformation(">>>>>>>>>> Success parse integer driverPkId. <<<<<<<<<<");
-                    try
-                    {
-                        _logger.LogInformation(">>>>>>>>>> Find driver by driverPkId and assign old drivername. <<<<<<<<<<");
-                        Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
-                        if (oldDriver != null)
-                        {
-                            trafficControlCenterInvestigationDept.DriverName = oldDriver.DriverName;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(">>>>>>>>>> Error occur when finding driver by driverPkId and assign old drivername. <<<<<<<<<<" + e);
-                        throw;
-                    }
-                }
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                _logger.LogInformation(">>>>>>>>>> Success find driver by driverPkId and assign old drivername. <<<<<<<<<<");
+                trafficControlCenterInvestigationDept.Driver = oldDriver;
+                Update(trafficControlCenterInvestigationDept);
+                return true;
             }
-            catch (Exception e)
+            VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(trafficControlCenterInvestigationDept.VehicleNumber);
+            Driver existingDriver = _driverService.FindDriverByIdNumberAndLicenseAndVehicle(trafficControlCenterInvestigationDept.IDNumber, trafficControlCenterInvestigationDept.DriverLicense, vehicleData.VehicleDataPkid);
+            if (existingDriver != null)
             {
-                _logger.LogError(">>>>>>>>>> Error occur when parseing driver. <<<<<<<<<<" + e);
-                throw;
-            }
-            Driver existingDriver = null;
-            _logger.LogInformation(">>>>>>>>>> Get driver by driverLicense. <<<<<<<<<<");
-            try
-            {
-                _logger.LogInformation(">>>>>>>>>> Success Get driver by driverLicense. <<<<<<<<<<");
-                existingDriver = _driverService.FindDriverByLicense(trafficControlCenterInvestigationDept.DriverLicense);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(">>>>>>>>>> Error occur when getting driver by driverLicense <<<<<<<<<<" + e);
-                throw;
-            }
-            try
-            {
-                _logger.LogInformation(">>>>>>>>>> Create new driver or edit old driver and edit TrafficControlCenterInvestigationDept. <<<<<<<<<<");
-                if (existingDriver == null)
-                {
-                    VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(trafficControlCenterInvestigationDept.VehicleNumber);
-                    Driver driver = new Driver
-                    {
-                        DriverName = trafficControlCenterInvestigationDept.DriverName,
-                        DriverLicense = trafficControlCenterInvestigationDept.DriverLicense,
-                    };
-                    driver.VehicleData = vehicleData;
-                    _driverService.CreateDriver(driver);
-                    trafficControlCenterInvestigationDept.Driver = driver;
-                    _logger.LogInformation(">>>>>>>>>> Edit success TrafficControlCenterInvestigationDept with new driver. <<<<<<<<<<");
-                    return Update(trafficControlCenterInvestigationDept);
+                Console.WriteLine("existing driver not null.................." + existingDriver.DriverPkid);
+                existingDriver.DriverName = trafficControlCenterInvestigationDept.DriverName;
+                _driverService.EditDriver(existingDriver);
+                Console.WriteLine("before insert driver.............." + trafficControlCenterInvestigationDept.Driver.DriverPkid);
 
-                }
-                else
-                {
-                    existingDriver.DriverName = trafficControlCenterInvestigationDept.DriverName;
-                    existingDriver.DriverLicense = trafficControlCenterInvestigationDept.DriverLicense;
-                    //existingDriver.VehicleNumber = trafficControlCenterInvestigationDept.VehicleNumber;
-                    _driverService.EditDriver(existingDriver);
-                    trafficControlCenterInvestigationDept.Driver = existingDriver;
-                    _logger.LogInformation(">>>>>>>>>> Edit success TrafficControlCenterInvestigationDept with existing driver.<<<<<<<<<<");
-
-                    return Update(trafficControlCenterInvestigationDept);
-                }
+                trafficControlCenterInvestigationDept.Driver = existingDriver;
+                Console.WriteLine("After insert driver.............." + trafficControlCenterInvestigationDept.Driver.DriverPkid);
+                return Update(trafficControlCenterInvestigationDept);
             }
-            catch (Exception e)
-            {
-                _logger.LogError(">>>>>>>>>> Error occur when creating new driver or edit old driver and create TrafficControlCenterInvestigationDept. <<<<<<<<<<" + e);
-                throw;
-            }
+            Driver currentDriver = _driverService.FindDriverById(trafficControlCenterInvestigationDept.Driver.DriverPkid);
+            currentDriver.IDNumber = trafficControlCenterInvestigationDept.IDNumber;
+            currentDriver.DriverLicense = trafficControlCenterInvestigationDept.DriverLicense;
+            currentDriver.DriverName = trafficControlCenterInvestigationDept.DriverName;
+            _driverService.EditDriver(currentDriver);
+            trafficControlCenterInvestigationDept.Driver = currentDriver;
+            _logger.LogInformation(">>>>>>>>>> Edit success specialEventInvestigationDept with existing driver.<<<<<<<<<<");
+            return Update(trafficControlCenterInvestigationDept);
         }
 
         public bool DeleteTrafficControlCenterInvestigationDept(TrafficControlCenterInvestigationDept trafficControlCenterInvestigationDept)
@@ -322,6 +310,7 @@ namespace YBOInvestigation.Services.Impl
                            .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSCompany)
                            .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.YBSType)
                            .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver)
+                           .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.PunishmentType)
                            .Include(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.Driver.VehicleData)
                            .FirstOrDefault(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.TrafficControlCenterInvestigationDeptPkid == id);
             }
@@ -340,15 +329,15 @@ namespace YBOInvestigation.Services.Impl
                                         new DataColumn("ဖမ်းဆီးရက်စွဲ"),
                                         new DataColumn("ဖမ်းဆီးသည့်အချိန်"),
                                         new DataColumn("မီးနီဖြတ်သည့်နေရာ"),
-                                        new DataColumn("အကြိမ်အရေအတွက်"),
                                         new DataColumn("ဖုန်းနံပါတ်"),
                                         new DataColumn("သတင်းပေးပို့သူ"),
-                                        new DataColumn("တိုင်ကြားသည့်အကြောင်းအရာ"),
+                                        new DataColumn("အမှုအမျိုးအစား"),
                                         new DataColumn("ဆောင်ရွက်ပြီးစီးမှု"),
                                         new DataColumn("ဆောင်ရွက်ပြီးစီးသည့်ရက်စွဲ"),
                                         new DataColumn("ယာဥ်မောင်းအမည်"),
                                         new DataColumn("ယာဥ်အမှတ်"),
                                         new DataColumn("လိုင်စင်အမှတ်"),
+                                        new DataColumn("ID Number"),
                                         new DataColumn("YBS Company Name"),
                                         new DataColumn("ယာဥ်လိုင်း"),
                                         });
@@ -390,7 +379,7 @@ namespace YBOInvestigation.Services.Impl
                 {
                     foreach (var trafficControlCenterInvestigationDept in list)
                     {
-                        dt.Rows.Add(trafficControlCenterInvestigationDept.RecordDate, trafficControlCenterInvestigationDept.RecordTime, trafficControlCenterInvestigationDept.RedLightCrossingPlace, trafficControlCenterInvestigationDept.TotalRecord, trafficControlCenterInvestigationDept.Phone, trafficControlCenterInvestigationDept.YbsRecordSender, trafficControlCenterInvestigationDept.RecordDescription, trafficControlCenterInvestigationDept.CompletionStatus, trafficControlCenterInvestigationDept.CompletedDate, trafficControlCenterInvestigationDept.Driver.DriverName, trafficControlCenterInvestigationDept.Driver.VehicleData.VehicleNumber, trafficControlCenterInvestigationDept.Driver.DriverLicense, trafficControlCenterInvestigationDept.YBSCompany.YBSCompanyName, trafficControlCenterInvestigationDept.YBSType.YBSTypeName);
+                        dt.Rows.Add(trafficControlCenterInvestigationDept.RecordDate, trafficControlCenterInvestigationDept.RecordTime, trafficControlCenterInvestigationDept.RedLightCrossingPlace, trafficControlCenterInvestigationDept.Phone, trafficControlCenterInvestigationDept.YbsRecordSender, trafficControlCenterInvestigationDept.PunishmentType.Punishment, trafficControlCenterInvestigationDept.CompletionStatus, trafficControlCenterInvestigationDept.CompletedDate, trafficControlCenterInvestigationDept.Driver.DriverName, trafficControlCenterInvestigationDept.Driver.VehicleData.VehicleNumber, trafficControlCenterInvestigationDept.Driver.DriverLicense, trafficControlCenterInvestigationDept.YBSCompany.YBSCompanyName, trafficControlCenterInvestigationDept.Driver.IDNumber,trafficControlCenterInvestigationDept.YBSType.YBSTypeName);
                     }
                 }
                 _logger.LogInformation(">>>>>>>>>> Assign list to dataTable success. <<<<<<<<<<");
@@ -399,6 +388,24 @@ namespace YBOInvestigation.Services.Impl
             catch (Exception e)
             {
                 _logger.LogError(">>>>>>>>>> Error occur when assigning SearchAll or GetAll TrafficControlCenterInvestigationDept list to dataTable. <<<<<<<<<<" + e);
+                throw;
+            }
+        }
+
+        public int GetTotalRecordByDriver(int driverPkId)
+        {
+            _logger.LogInformation(">>>>>>>>>> [TrafficControlCenterInvestigationDepts][FindCallCenterInvestigationDeptByIdEgerLoad] Find CallCenterInvestigationDept by pkId with eger load <<<<<<<<<<");
+            try
+            {
+                _logger.LogInformation(">>>>>>>>>> Success find TrafficControlCenterInvestigationDepts by pkId with eger load.<<<<<<<<<<");
+                int TotalRecord = _context.TrafficControlCenterInvestigationDepts.Count(record => record.DriverPkid == driverPkId);
+                if (TotalRecord == 0)
+                    return 1;
+                return TotalRecord;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(">>>>>>>>>> Error occur when finding TrafficControlCenterInvestigationDepts by pkId with eger load. <<<<<<<<<<" + e);
                 throw;
             }
         }

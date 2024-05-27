@@ -13,5 +13,6 @@ namespace YBOInvestigation.Services
         YBOInvestigationDept FindYBOInvestigationDeptByIdEgerLoad(int id);
         bool EditYBOInvestigationDept(YBOInvestigationDept yBOInvestigationDept);
         DataTable MakeYBOInvestigationDeptExcelData(PagingList<YBOInvestigationDept> yBOInvestigationDepts, bool exportAll);
+        public int GetTotalRecordByDriver(int driverPkId);
     }
 }

@@ -9,16 +9,16 @@
         public int Age { get; set; }
 
         [StringLength(50)]
-        public string FatherName { get; set; }
+        public string? FatherName { get; set; }
 
         [StringLength(50)]
-        public string EducationLevel { get; set; }
+        public string? EducationLevel { get; set; }
 
         [StringLength(100)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [StringLength(50)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [ForeignKey("Driver")]
         public int DriverPkid { get; set; }

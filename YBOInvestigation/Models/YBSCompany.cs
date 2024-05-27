@@ -7,9 +7,9 @@
         public int YBSCompanyPkid { get; set; }
 
         [StringLength(100)]
-        public string YBSCompanyName { get; set; }
+        public string? YBSCompanyName { get; set; }
 
-        public bool IsDeleted { get; set; }
+        public bool? IsDeleted { get; set; }
 
     }
 }

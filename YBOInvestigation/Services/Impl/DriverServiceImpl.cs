@@ -25,6 +25,50 @@ namespace YBOInvestigation.Services.Impl
                 throw;
             }
         }
+        public Driver FindDriverByIdNumberAndLicenseAndVehicle(string idNumber, string licenseNumber, int vehicleId)
+        {
+            Driver driver = null;
+            if(idNumber != null && (idNumber != null && idNumber.Trim() != "စီစစ်ဆဲ".Trim()))
+            { 
+                Console.WriteLine("Here idNumber................" + idNumber);
+                driver =  _context.Drivers.Where(driver => (driver.IDNumber == idNumber && driver.VehicleDataPkid == vehicleId)).FirstOrDefault();
+                if (driver != null)
+                    return driver;
+            }
+            if (licenseNumber != null && (licenseNumber != null && licenseNumber.Trim() != "စီစစ်ဆဲ".Trim()))
+            {
+                Console.WriteLine("Here license................" + licenseNumber);
+                return _context.Drivers.Where(driver => (driver.DriverLicense == licenseNumber && driver.VehicleDataPkid == vehicleId)).FirstOrDefault();
+
+            }
+            
+            Console.WriteLine("Here id and license null or default.....");
+            return null;
+        }
+
+        public Driver IsExistingDriver(string idNumber, string licenseNumber)
+        { 
+            if((idNumber != "စီစစ်ဆဲ" || licenseNumber != "စီစစ်ဆဲ") && (idNumber != null || licenseNumber != null))
+            {
+                Driver driver = _context.Drivers.Where(driver => driver.IDNumber == idNumber).FirstOrDefault(); 
+                if(driver != null)
+                {
+                    if (driver.DriverLicense != licenseNumber)
+                        return driver;//အိုင်ဒီတူ လိုင်စင်မတူ 
+                    return null;//အိုင်ဒီတူ လိုင်စင်တူ 
+                }
+                driver = _context.Drivers.Where(driver => driver.DriverLicense == licenseNumber).FirstOrDefault();
+                if (driver != null)
+                {
+                    if (driver.IDNumber != idNumber)
+                        return driver;// အိုင်ဒီမတူ လိုင်စင်တူ 
+                    return null; // အိုင်ဒီတူ လိုင်စင်တူ 
+
+                }
+                return null; // အိုင်ဒီမတူ လိုင်စင်မတူ 
+            }
+            return null;
+        }
 
         public Driver FindDriverById(int driverPkId)
         {
@@ -82,6 +126,28 @@ namespace YBOInvestigation.Services.Impl
             catch(Exception e)
             {
                 _logger.LogError(">>>>>>>>>> Error occur when creating driver. <<<<<<<<<<" + e);
+                throw;
+            }
+        }
+
+        public bool CreateDefaultDriver(VehicleData vehicleData)
+        {
+            _logger.LogInformation(">>>>>>>>>> [DriverServiceImpl][CreateDefaultDriver] Create default driver. <<<<<<<<<<");
+            try
+            {
+                _logger.LogInformation($">>>>>>>>>> Success. Create default driver. <<<<<<<<<<");
+                Driver defaultDriver = new Driver()
+                {
+                    IDNumber = "စီစစ်ဆဲ",
+                    DriverLicense = "စီစစ်ဆဲ",
+                    DriverName = "စီစစ်ဆဲ",
+                    VehicleData = vehicleData
+                };
+                return Create(defaultDriver);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(">>>>>>>>>> Error occur when creating default driver. <<<<<<<<<<" + e);
                 throw;
             }
         }

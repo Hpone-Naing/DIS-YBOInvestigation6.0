@@ -17,12 +17,12 @@ namespace YBOInvestigation.Models
         [NotMapped]
         [StringLength(50)]
         [DisplayName("သင်တန်းသားအမည်")]
-        public string DriverName { get; set; }
+        public string? DriverName { get; set; }
 
         [NotMapped]
         [StringLength(50)]
         [DisplayName("ယာဥ်အမှတ်")]
-        public string VehicleNumber { get; set; }
+        public string? VehicleNumber { get; set; }
 
         [NotMapped]
         [DisplayName("အသက်")]
@@ -31,38 +31,39 @@ namespace YBOInvestigation.Models
         [NotMapped]
         [StringLength(50)]
         [DisplayName("အဖအမည်")]
-        public string FatherName { get; set; }
+        public string? FatherName { get; set; }
 
         [NotMapped]
         [StringLength(50)]
         [DisplayName("ပညာအရည်အချင်း")]
-        public string EducationLevel { get; set; }
+        public string? EducationLevel { get; set; }
 
         [NotMapped]
         [StringLength(100)]
         [DisplayName("နေရပ်လိပ်စာ")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         [NotMapped]
         [StringLength(50)]
         [DisplayName("ဖုန်းနံပါတ်")]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [NotMapped]
         [StringLength(50)]
         [DisplayName("လိုင်စင်အမှတ်")]
-        public string DriverLicense { get; set; }
+        public string? DriverLicense { get; set; }
 
+        [NotMapped]
         [StringLength(50)]
         [DisplayName("ID အမှတ်")]
-        public string IDNumber { get; set; }
+        public string? IDNumber { get; set; }
 
         public bool? IsDeleted { get; set; }
 
         public DateTime? CreatedDate { get; set; }
 
         [StringLength(50)]
-        public string CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
 
         [ForeignKey("YBSCompany")]
         [DisplayName("YBS Company")]
@@ -85,5 +86,19 @@ namespace YBOInvestigation.Models
         public int TrainedYBSDriverInfoPkid { get; set; }
         public virtual TrainedYBSDriverInfo TrainedYBSDriverInfo { get; set; }
 
+        public bool IsDefaultIdNumber()
+        {
+            return IDNumber == null || IDNumber == "စီစစ်ဆဲ";
+        }
+
+        public bool IsDefaultLinenseNumber()
+        {
+            return DriverLicense == null || DriverLicense == "စီစစ်ဆဲ";
+        }
+
+        public bool IsNotDefaultDriver()
+        {
+            return (!IsDefaultLinenseNumber() || !IsDefaultIdNumber());
+        }
     }
 }

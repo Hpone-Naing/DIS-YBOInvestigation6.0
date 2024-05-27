@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using YBOInvestigation.Classes;
 using YBOInvestigation.Models;
 using YBOInvestigation.Paging;
 
@@ -13,5 +14,6 @@ namespace YBOInvestigation.Services
         CallCenterInvestigationDept FindCallCenterInvestigationDeptByIdEgerLoad(int id);
         bool EditCallCenterInvestigationDept(CallCenterInvestigationDept callCenterInvestigationDept);
         DataTable MakeCallCenterInvestigationDeptExcelData(PagingList<CallCenterInvestigationDept> callCenterInvestigationDepts, bool exportAll);
+        public int GetTotalRecordByDriver(int driverPkId);
     }
 }

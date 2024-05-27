@@ -85,7 +85,7 @@ namespace YBOInvestigation.Factories.Impl
         public SpecialEventInvestigationDeptService CreateSpecialEventInvestigationDeptService()
         {
             ILogger<SpecialEventInvestigationDeptServiceImpl> specialEventInveDeptLogger = new Logger<SpecialEventInvestigationDeptServiceImpl>(_loggerFactory);
-            return new SpecialEventInvestigationDeptServiceImpl(_context, specialEventInveDeptLogger, _vehicleDataService);
+            return new SpecialEventInvestigationDeptServiceImpl(_context, specialEventInveDeptLogger, _vehicleDataService, _driverService);
         }
 
         public PunishmentTypeService CreatePunishmentTypeService()

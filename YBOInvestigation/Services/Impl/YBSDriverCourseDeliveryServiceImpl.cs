@@ -1,6 +1,7 @@
 ﻿using YBOInvestigation.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using YBOInvestigation.Models;
 
 namespace YBOInvestigation.Services.Impl
 {
@@ -26,7 +27,9 @@ namespace YBOInvestigation.Services.Impl
             try
             {
                 _logger.LogInformation($">>>>>>>>>> Retrieve YBSDriverCourseDelivery List success. <<<<<<<<<<");
-                return GetAll().Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.IsDeleted == false).ToList();
+                return GetAll()
+                     .OrderByDescending(yBSDriverCourseDelivery => yBSDriverCourseDelivery.CreatedDate)
+                    .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.IsDeleted == false).ToList();
             }
             catch (Exception e)
             {
@@ -45,9 +48,11 @@ namespace YBOInvestigation.Services.Impl
                     .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.IsDeleted == false)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSCompany)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSType)
+                            .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.PunishmentType)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData)
+                            .OrderByDescending(yBSDriverCourseDelivery => yBSDriverCourseDelivery.CreatedDate)
                             .ToList();
             }
             catch (Exception e)
@@ -77,7 +82,7 @@ namespace YBOInvestigation.Services.Impl
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData)
-                            .ToList()
+                            .AsEnumerable()
                             .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSCompany.IsDeleted == false)
                             .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.YBSType.IsDeleted == false)
                             .Where(yBSDriverCourseDelivery => yBSDriverCourseDelivery.PunishmentType.IsDeleted == false)
@@ -89,7 +94,9 @@ namespace YBOInvestigation.Services.Impl
                             || IsSearchDataContained(yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver, searchString)
                             || IsSearchDataContained(yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData, searchString)
                             || IsSearchDataContained(yBSDriverCourseDelivery.PunishmentType, searchString)
-                            ).AsQueryable().ToList();
+                            )
+                            .OrderByDescending(yBSDriverCourseDelivery => yBSDriverCourseDelivery.CreatedDate)
+                            .ToList();
                     }
                     catch (Exception e)
                     {
@@ -111,6 +118,7 @@ namespace YBOInvestigation.Services.Impl
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver)
                             .Include(yBSDriverCourseDelivery => yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData)
+                            .OrderByDescending(yBSDriverCourseDelivery => yBSDriverCourseDelivery.CreatedDate)
                             .ToList();
                     }
                     catch (Exception e)
@@ -150,6 +158,10 @@ namespace YBOInvestigation.Services.Impl
                         {
                             yBSDriverCourseDelivery.DriverName = oldDriver.DriverName;
                         }
+                        else
+                        {
+                            yBSDriverCourseDelivery.DriverName = "စီစစ်ဆဲ";
+                        }
                     }
                 }
                 catch (Exception e)
@@ -163,12 +175,16 @@ namespace YBOInvestigation.Services.Impl
                 _logger.LogError(">>>>>>>>>> Error occur when parseing driver. <<<<<<<<<<" + e);
                 throw;
             }
+            VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yBSDriverCourseDelivery.VehicleNumber);
             Driver existingDriver = null;
             _logger.LogInformation(">>>>>>>>>> Get driver by driverLicense. <<<<<<<<<<");
             try
             {
                 _logger.LogInformation(">>>>>>>>>> Success Get driver by driverLicense. <<<<<<<<<<");
-                existingDriver = _driverService.FindDriverByLicense(yBSDriverCourseDelivery.DriverLicense);
+                
+                    existingDriver = _driverService.FindDriverByIdNumberAndLicenseAndVehicle(yBSDriverCourseDelivery.IDNumber, yBSDriverCourseDelivery.DriverLicense, vehicleData.VehicleDataPkid);
+                
+                
             }
             catch (Exception e)
             {
@@ -188,13 +204,26 @@ namespace YBOInvestigation.Services.Impl
                 };
                 if (existingDriver == null)
                 {
-                    VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yBSDriverCourseDelivery.VehicleNumber);
-
                     Driver driver = new Driver
                     {
                         DriverName = yBSDriverCourseDelivery.DriverName,
-                        DriverLicense = yBSDriverCourseDelivery.DriverLicense,
                     };
+                    if (yBSDriverCourseDelivery.IsDefaultIdNumber())
+                    {
+                        driver.IDNumber = "စီစစ်ဆဲ";
+                    }
+                    else
+                    {
+                        driver.IDNumber = yBSDriverCourseDelivery.IDNumber;
+                    }
+                    if (yBSDriverCourseDelivery.IsDefaultLinenseNumber())
+                    {
+                        driver.DriverLicense = "စီစစ်ဆဲ";
+                    }
+                    else
+                    {
+                        driver.DriverLicense = yBSDriverCourseDelivery.DriverLicense;
+                    }
                     driver.VehicleData = vehicleData;
                     trainedDriverInfo.Driver = driver;
                     //_driverService.CreateDriver(driver);
@@ -232,115 +261,50 @@ namespace YBOInvestigation.Services.Impl
 
         public bool EditYBSDriverCourseDeliveries(YBSDriverCourseDelivery yBSDriverCourseDelivery)
         {
-            _logger.LogInformation(">>>>>>>>>> [YBSDriverCourseDeliveryServiceImpl][EditYBSDriverCourseDeliveries] Edit YBSDriverCourseDelivery <<<<<<<<<<");
             yBSDriverCourseDelivery.IsDeleted = false;
             yBSDriverCourseDelivery.CreatedDate = DateTime.Now;
             yBSDriverCourseDelivery.CreatedBy = "admin";
-            _logger.LogInformation(">>>>>>>>>> Parse integer driverPkId. <<<<<<<<<<");
-            try
-            {
-                if (int.TryParse(yBSDriverCourseDelivery.DriverName, out int oldDriverPkId))
-                {
-                    _logger.LogInformation(">>>>>>>>>> Success parse integer driverPkId. <<<<<<<<<<");
-                    try
-                    {
-                        _logger.LogInformation(">>>>>>>>>> Find driver by driverPkId and assign old drivername. <<<<<<<<<<");
-                        Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
-                        if (oldDriver != null)
-                        {
-                            yBSDriverCourseDelivery.DriverName = oldDriver.DriverName;
-                        }
-                        _logger.LogInformation(">>>>>>>>>> Success find driver by driverPkId and assign old drivername. <<<<<<<<<<");
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(">>>>>>>>>> Error occur when finding driver by driverPkId and assign old drivername. <<<<<<<<<<" + e);
-                        throw;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(">>>>>>>>>> Error occur when parseing driver. <<<<<<<<<<" + e);
-                throw;
-            }
-            TrainedYBSDriverInfo trainedDriverInfo = new TrainedYBSDriverInfo
-            {
-                Age = yBSDriverCourseDelivery.Age,
-                FatherName = yBSDriverCourseDelivery.FatherName,
-                Address = yBSDriverCourseDelivery.Address,
-                EducationLevel = yBSDriverCourseDelivery.EducationLevel,
-                Phone = yBSDriverCourseDelivery.Phone
-            };
-            Driver existingDriver = null;
-            _logger.LogInformation(">>>>>>>>>> Get driver by driverLicense. <<<<<<<<<<");
-            try
-            {
-                _logger.LogInformation(">>>>>>>>>> Success Get driver by driverLicense. <<<<<<<<<<");
 
-                existingDriver = _driverService.FindDriverByLicense(yBSDriverCourseDelivery.DriverLicense);
-            }
-            catch (Exception e)
+            TrainedYBSDriverInfo trainedYBSDriverInfo = _trainedDriverInfoService.FindTrainedYBSDriverInfoById(yBSDriverCourseDelivery.TrainedYBSDriverInfoPkid);
+            trainedYBSDriverInfo.Age = yBSDriverCourseDelivery.Age;
+            trainedYBSDriverInfo.Address = yBSDriverCourseDelivery.Address;
+            trainedYBSDriverInfo.Phone = yBSDriverCourseDelivery.Phone;
+            trainedYBSDriverInfo.FatherName = yBSDriverCourseDelivery.FatherName;
+            trainedYBSDriverInfo.EducationLevel = yBSDriverCourseDelivery.EducationLevel;
+
+            if (int.TryParse(yBSDriverCourseDelivery.DriverName, out int oldDriverPkId))
             {
-                _logger.LogError(">>>>>>>>>> Error occur when getting driver by driverLicense <<<<<<<<<<" + e);
-                throw;
+                Driver oldDriver = _driverService.FindDriverById(oldDriverPkId);
+                trainedYBSDriverInfo.Driver = oldDriver;
+                _trainedDriverInfoService.EditTrainedYBSDriverInfo(trainedYBSDriverInfo);
+                yBSDriverCourseDelivery.TrainedYBSDriverInfo = trainedYBSDriverInfo;
+                Update(yBSDriverCourseDelivery);
+                return true;
             }
-            try
+            VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yBSDriverCourseDelivery.VehicleNumber);
+            Driver existingDriver = _driverService.FindDriverByIdNumberAndLicenseAndVehicle(yBSDriverCourseDelivery.IDNumber, yBSDriverCourseDelivery.DriverLicense, vehicleData.VehicleDataPkid);
+            if (existingDriver != null)
             {
-                _logger.LogInformation(">>>>>>>>>> Create new driver or edit old driver and edit YBSDriverCourseDelivery. <<<<<<<<<<");
+                Console.WriteLine("existing driver not null.................." + existingDriver.DriverPkid);
+                existingDriver.DriverName = yBSDriverCourseDelivery.DriverName;
+                _driverService.EditDriver(existingDriver);
 
-                if (existingDriver == null)
-                {
-                    VehicleData vehicleData = _vehicleDataService.FindVehicleByVehicleNumber(yBSDriverCourseDelivery.VehicleNumber);
-                    Driver driver = new Driver
-                    {
-                        DriverName = yBSDriverCourseDelivery.DriverName,
-                        DriverLicense = yBSDriverCourseDelivery.DriverLicense,
-                    };
-
-                    driver.VehicleData = vehicleData;
-                    _driverService.CreateDriver(driver);
-                    trainedDriverInfo.Driver = driver;
-                    _trainedDriverInfoService.CreateTrainedYBSDriverInfo(trainedDriverInfo);
-                    yBSDriverCourseDelivery.TrainedYBSDriverInfo = trainedDriverInfo;
-                    return Update(yBSDriverCourseDelivery);
-
-                }
-                else
-                {
-                    existingDriver.DriverName = yBSDriverCourseDelivery.DriverName;
-                    existingDriver.DriverLicense = yBSDriverCourseDelivery.DriverLicense;
-                    _driverService.EditDriver(existingDriver);
-
-                    TrainedYBSDriverInfo existingTrainedDriverInfo = _trainedDriverInfoService.GetTrainedYBSDriverInfoByDriverId(existingDriver.DriverPkid);
-                    if (existingTrainedDriverInfo == null)
-                    {
-                        trainedDriverInfo.Driver = existingDriver;
-                        _trainedDriverInfoService.CreateTrainedYBSDriverInfo(trainedDriverInfo);
-                        yBSDriverCourseDelivery.TrainedYBSDriverInfo = trainedDriverInfo;
-                        _logger.LogInformation(">>>>>>>>>> Edit success YBSDriverCourseDelivery with new driver. <<<<<<<<<<");
-                        return Update(yBSDriverCourseDelivery);
-                    }
-                    else
-                    {
-                        existingTrainedDriverInfo.Age = yBSDriverCourseDelivery.Age;
-                        existingTrainedDriverInfo.Address = yBSDriverCourseDelivery.Address;
-                        existingTrainedDriverInfo.Phone = yBSDriverCourseDelivery.Phone;
-                        existingTrainedDriverInfo.FatherName = yBSDriverCourseDelivery.FatherName;
-                        existingTrainedDriverInfo.EducationLevel = yBSDriverCourseDelivery.EducationLevel;
-                        yBSDriverCourseDelivery.TrainedYBSDriverInfo = existingTrainedDriverInfo;
-                        _trainedDriverInfoService.EditTrainedYBSDriverInfo(existingTrainedDriverInfo);
-                        yBSDriverCourseDelivery.TrainedYBSDriverInfo = existingTrainedDriverInfo;
-                        _logger.LogInformation(">>>>>>>>>> Edit success YBSDriverCourseDelivery with existing driver.<<<<<<<<<<");
-                        return Update(yBSDriverCourseDelivery);
-                    }
-                }
+                trainedYBSDriverInfo.Driver = existingDriver;
+                _trainedDriverInfoService.EditTrainedYBSDriverInfo(trainedYBSDriverInfo);
+                yBSDriverCourseDelivery.TrainedYBSDriverInfo = trainedYBSDriverInfo;
+                return Update(yBSDriverCourseDelivery);
             }
-            catch (Exception e)
-            {
-                _logger.LogError(">>>>>>>>>> Error occur when creating new driver or edit old driver and create YBSDriverCourseDelivery. <<<<<<<<<<" + e);
-                throw;
-            }
+            Driver currentDriver = _driverService.FindDriverById(yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverPkid);
+            currentDriver.IDNumber = yBSDriverCourseDelivery.IDNumber;
+            currentDriver.DriverLicense = yBSDriverCourseDelivery.DriverLicense;
+            currentDriver.DriverName = yBSDriverCourseDelivery.DriverName;
+            _driverService.EditDriver(currentDriver);
+
+            trainedYBSDriverInfo.Driver = currentDriver;
+            _trainedDriverInfoService.EditTrainedYBSDriverInfo(trainedYBSDriverInfo);
+            yBSDriverCourseDelivery.TrainedYBSDriverInfo = trainedYBSDriverInfo;
+            return Update(yBSDriverCourseDelivery);
+            
         }
 
         public bool DeleteYBSDriverCourseDeliveries(YBSDriverCourseDelivery yBSDriverCourseDelivery)
@@ -402,7 +366,6 @@ namespace YBOInvestigation.Services.Impl
             dt.Columns.AddRange(new DataColumn[13] {
                                         new DataColumn("ပြုလုပ်ရက်စွဲ"),
                                         new DataColumn("အမှုအမျိုးအစား"),
-                                        new DataColumn("အကြိမ်အရေ"),
                                         new DataColumn("သင်တန်းသားအမည်"),
                                         new DataColumn("အသက်"),
                                         new DataColumn("အဖအမည်"),
@@ -411,6 +374,7 @@ namespace YBOInvestigation.Services.Impl
                                         new DataColumn("ဖုန်းနံပါတ်"),
                                         new DataColumn("ယာဥ်အမှတ်"),
                                         new DataColumn("လိုင်စင်အမှတ်"),
+                                        new DataColumn("ID Number"),
                                         new DataColumn("YBS Company Name"),
                                         new DataColumn("ယာဥ်လိုင်း"),
                                         });
@@ -449,18 +413,36 @@ namespace YBOInvestigation.Services.Impl
             {
                 _logger.LogInformation(">>>>>>>>>> Assign list to dataTable. <<<<<<<<<<");
                 if (list.Count() > 0)
-            {
-                foreach (var yBSDriverCourseDelivery in list)
                 {
-                    dt.Rows.Add(yBSDriverCourseDelivery.EventDate, yBSDriverCourseDelivery.PunishmentType.Punishment, yBSDriverCourseDelivery.TotalRecord, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Age, yBSDriverCourseDelivery.TrainedYBSDriverInfo.FatherName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.EducationLevel, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Address, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Phone, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleNumber, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverLicense, yBSDriverCourseDelivery.YBSCompany.YBSCompanyName, yBSDriverCourseDelivery.YBSType.YBSTypeName);
+                    foreach (var yBSDriverCourseDelivery in list)
+                    {
+                        dt.Rows.Add(yBSDriverCourseDelivery.EventDate, yBSDriverCourseDelivery.PunishmentType.Punishment, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Age, yBSDriverCourseDelivery.TrainedYBSDriverInfo.FatherName, yBSDriverCourseDelivery.TrainedYBSDriverInfo.EducationLevel, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Address, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Phone, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.VehicleData.VehicleNumber, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.DriverLicense, yBSDriverCourseDelivery.TrainedYBSDriverInfo.Driver.IDNumber, yBSDriverCourseDelivery.YBSCompany.YBSCompanyName, yBSDriverCourseDelivery.YBSType.YBSTypeName);
+                    }
                 }
-            }
                 _logger.LogInformation(">>>>>>>>>> Assign list to dataTable success. <<<<<<<<<<");
                 return dt;
             }
             catch (Exception e)
             {
                 _logger.LogError(">>>>>>>>>> Error occur when assigning SearchAll or GetAll YBSDriverCourseDelivery list to dataTable. <<<<<<<<<<" + e);
+                throw;
+            }
+        }
+
+        public int GetTotalRecordByDriver(int driverPkId)
+        {
+            _logger.LogInformation(">>>>>>>>>> [CallCenterInvestigationDeptServiceImpl][FindCallCenterInvestigationDeptByIdEgerLoad] Find CallCenterInvestigationDept by pkId with eger load <<<<<<<<<<");
+            try
+            {
+                _logger.LogInformation(">>>>>>>>>> Success find CallCenterInvestigationDept by pkId with eger load.<<<<<<<<<<");
+                int TotalRecord = _context.YBSDriverCourseDeliveries.Include(record => record.TrainedYBSDriverInfo).Include(record => record.TrainedYBSDriverInfo.Driver).Count(record => record.TrainedYBSDriverInfo.DriverPkid == driverPkId);
+                if (TotalRecord == 0)
+                    return 1;
+                return TotalRecord;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(">>>>>>>>>> Error occur when finding CallCenterInvestigationDept by pkId with eger load. <<<<<<<<<<" + e);
                 throw;
             }
         }

@@ -18,7 +18,7 @@ namespace YBOInvestigation.Services.Impl
             try
             {
                 _logger.LogInformation($">>>>>>>>>> Success. Get PunishmentType list. <<<<<<<<<<");
-                return GetAll().Where(punishmentType => !punishmentType.IsDeleted).ToList();
+                return GetAll().Where(punishmentType => punishmentType.IsDeleted == false).ToList();
             }
             catch(Exception e)
             {
@@ -101,7 +101,7 @@ namespace YBOInvestigation.Services.Impl
             try
             {
                 _logger.LogInformation($">>>>>>>>>> Success. Get unique PunishmentType list. <<<<<<<<<<");
-                return GetUniqueList(punishmentType => punishmentType.PunishmentTypePkid).Where(punishmentType => !punishmentType.IsDeleted).ToList();
+                return GetUniqueList(punishmentType => punishmentType.PunishmentTypePkid).Where(punishmentType => punishmentType.IsDeleted == false).ToList();
             }
             catch(Exception e)
             {

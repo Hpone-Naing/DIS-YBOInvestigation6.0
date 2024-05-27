@@ -9,10 +9,14 @@ namespace YBOInvestigation.Models
         public int DriverPkid { get; set; }
 
         [StringLength(50)]
-        public string DriverName { get; set; }
+        [DisplayName("ID အမှတ်")]
+        public string? IDNumber { get; set; }
 
         [StringLength(50)]
-        public string DriverLicense { get; set; }
+        public string? DriverName { get; set; }
+
+        [StringLength(50)]
+        public string? DriverLicense { get; set; }
 
         [ForeignKey("VehicleData")]
         public int VehicleDataPkid { get; set; }
