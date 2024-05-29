@@ -218,7 +218,7 @@ namespace YBOInvestigation.Controllers.YBORecord
             }
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            yboRecord.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
+            yboRecord.DriverName = (!string.IsNullOrEmpty(selectedOldDriverId) && selectedOldDriverId != "0") ? selectedOldDriverId : newDriverName;
             try
             {
                 if (_serviceFactory.CreateYBORecordService().EditYboRecord(yboRecord))

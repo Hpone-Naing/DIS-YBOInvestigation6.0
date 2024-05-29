@@ -223,7 +223,7 @@ namespace YBOInvestigation.Controllers.TrafficControlCenterInvestigationDeptCont
             }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            trafficControlCenterInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
+            trafficControlCenterInvestigationDept.DriverName = (!string.IsNullOrEmpty(selectedDriverName) && selectedDriverName != "0") ? selectedDriverName : newDriverName;
             try
             {
                 if (_serviceFactory.CreateTrafficControlCenterInvestigationDeptService().EditTrafficControlCenterInvestigationDept(trafficControlCenterInvestigationDept))

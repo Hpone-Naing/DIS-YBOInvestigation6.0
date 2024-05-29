@@ -219,7 +219,7 @@ namespace YBOInvestigation.Controllers.YBOInvestigationDeptController
             }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            yBOInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
+            yBOInvestigationDept.DriverName = (!string.IsNullOrEmpty(selectedDriverName) && selectedDriverName != "0") ? selectedDriverName : newDriverName;
             try
             {
                 if (_serviceFactory.CreateYBOInvestigationDeptService().EditYBOInvestigationDept(yBOInvestigationDept))

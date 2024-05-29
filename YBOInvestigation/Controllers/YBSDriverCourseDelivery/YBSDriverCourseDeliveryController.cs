@@ -222,7 +222,7 @@ namespace YBOInvestigation.Controllers.YBSDriverCourseDeliveryController
 
             string selectedOldDriverId = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            ybsDriverCourseDelivery.DriverName = !string.IsNullOrEmpty(selectedOldDriverId) ? selectedOldDriverId : newDriverName;
+            ybsDriverCourseDelivery.DriverName = (!string.IsNullOrEmpty(selectedOldDriverId) && selectedOldDriverId != "0") ? selectedOldDriverId : newDriverName;
             try
             {
                 if (_serviceFactory.CreateYBSDriverCourseDeliveryService().EditYBSDriverCourseDeliveries(ybsDriverCourseDelivery))

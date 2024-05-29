@@ -19,7 +19,7 @@
         <form class="input-group" method="get" action="@Url.Action("SearchVehicle", "VehicleData")">
 
             <div class="col">
-                <input list="datas" type="text" class="form-control" name="SearchString" placeholder="[Enter keyword to Search]" style="border-top-left-radius: 25px !important;border-bottom-left-radius: 25px;" autocomplete="off">
+                <input  type="text" class="form-control" name="SearchString" placeholder="[Enter keyword to Search]" style="border-top-left-radius: 25px !important;border-bottom-left-radius: 25px;" autocomplete="off">
                 <datalist id="datas">
                     @foreach (var i in ViewBag.AutoComplete)
                     {

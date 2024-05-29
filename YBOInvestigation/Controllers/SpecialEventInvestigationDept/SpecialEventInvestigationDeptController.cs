@@ -217,7 +217,7 @@ namespace YBOInvestigation.Controllers.SpecialEventInvestigationDeptController
             }
             string selectedDriverName = Request.Form["selectedDriverName"].FirstOrDefault() ?? "";
             string newDriverName = Request.Form["newDriverName"].FirstOrDefault() ?? "";
-            specialEventInvestigationDept.DriverName = !string.IsNullOrEmpty(selectedDriverName) ? selectedDriverName : newDriverName;
+            specialEventInvestigationDept.DriverName = (!string.IsNullOrEmpty(selectedDriverName) && selectedDriverName != "0") ? selectedDriverName : newDriverName;
             try
             {
                 if (_serviceFactory.CreateSpecialEventInvestigationDeptService().EditSpecialEventInvestigationDept(specialEventInvestigationDept))
