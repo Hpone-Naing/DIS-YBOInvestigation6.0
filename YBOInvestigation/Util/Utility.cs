@@ -5,7 +5,7 @@ namespace YBOInvestigation.Util
 {
     public class Utility
     {
-        public static int DEFAULT_PAGINATION_NUMBER = 5;
+        public static int DEFAULT_PAGINATION_NUMBER = 20;
 
         public static void AlertMessage(Controller controller, string message, string color)
         {

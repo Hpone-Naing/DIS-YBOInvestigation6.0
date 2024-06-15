@@ -34,9 +34,9 @@ namespace YBOInvestigation.Controllers.VechicleData
             int pageSize = Utility.DEFAULT_PAGINATION_NUMBER;
             AddSearchDatasToViewBag(searchString, searchOption);
             PagingList<DriverPunishmentInfo> driverPunishmentInfos = _serviceFactory.CreateVehicleDataService().GetAllDriverPunishmentInfoWithPagin(searchString, advanceSearch, pageNo, pageSize, searchOption);
-            ViewBag.AutoComplete = _serviceFactory.CreateVehicleDataService().GetAllVehicles()
-                .Select(vehicle => new { VehicleNumber = vehicle.VehicleNumber, YBSTypeName = vehicle.YBSType.YBSTypeName })
-                .ToList();
+            ViewBag.AutoComplete = _serviceFactory.CreateVehicleDataService().GetAllVehicles().Count();
+                /*.Select(vehicle => new { VehicleNumber = vehicle.VehicleNumber, YBSTypeName = vehicle.YBSType.YBSTypeName })
+                .ToList();*/
             if (string.IsNullOrEmpty(searchString))
                 return View();
             return View(driverPunishmentInfos);

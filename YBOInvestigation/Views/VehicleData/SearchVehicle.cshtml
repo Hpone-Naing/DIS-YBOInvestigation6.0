@@ -20,13 +20,13 @@
 
             <div class="col">
                 <input  type="text" class="form-control" name="SearchString" placeholder="[Enter keyword to Search]" style="border-top-left-radius: 25px !important;border-bottom-left-radius: 25px;" autocomplete="off">
-                <datalist id="datas">
+                @*<datalist id="datas">
                     @foreach (var i in ViewBag.AutoComplete)
                     {
                         <option value="@i.VehicleNumber" />
                         <option value="@i.YBSTypeName" />
                     }
-                </datalist>
+                </datalist>*@
             </div>
             <div class="input-group-append" style="background-color: white;">
                 <button type="submit" class="btn btn-outline"><i class="fa fa-search mt-1" style="color: #3a80b3;"></i></button>
@@ -56,7 +56,7 @@
         }
     </div>
 </div>
-@if (ViewBag.AutoComplete.Count < 1)
+@if (ViewBag.AutoComplete < 1)
 {
     <span class="text-danger"><i class="fas fa-exclamation-triangle"></i>မော်တော်ယာဥ်နှင့်သက်ဆိုင်သောဒေတာများမရှိသေးပါ။</span>
     <span class="text-danger">Transportation Departmentကိုဆက်သွယ်၍မော်တော်ယာဥ်အချက်အလက်များကိုဦးစွာဖြည့်သွင်းပါ။</span>

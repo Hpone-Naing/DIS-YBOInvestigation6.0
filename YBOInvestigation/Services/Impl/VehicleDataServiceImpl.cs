@@ -89,9 +89,9 @@ namespace YBOInvestigation.Services.Impl
                         }
                         else
                         {
-                            resultList = vehicleDatas.Where(vehicle => IsSearchDataContained(vehicle, searchString, searchOption) || IsSearchDataContained(vehicle.YBSType, searchString, searchOption))
+                            resultList = _context.VehicleDatas.Where(vehicle => vehicle.VehicleNumber.Contains(searchString)).ToList();/*vehicleDatas.Where(vehicle => IsSearchDataContained(vehicle, searchString, searchOption) || IsSearchDataContained(vehicle.YBSType, searchString, searchOption))
                             .AsQueryable()
-                            .ToList();
+                            .ToList();*/
                         }
 
                     }
