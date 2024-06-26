@@ -125,14 +125,15 @@ namespace YBOInvestigation.Services.Impl
             }
         }
 
-        public PagingList<DriverPunishmentInfo> GetAllDriverPunishmentInfoWithPagin(string searchString, AdvanceSearch advanceSearch, int? pageNo, int PageSize, string searchOption = null)
+        public PagingList<DriverPunishmentInfo> GetAllDriverPunishmentInfoWithPagin(string searchWord, AdvanceSearch advanceSearch, int? pageNo, int PageSize, string searchOption = null)
         {
             _logger.LogInformation(">>>>>>>>>> [VehicleDataServiceImpl][GetAllVehiclesWithPagin] SearchAll or GetAll VehicleData paginate eger load list. <<<<<<<<<<");
             try
             {
                 List<VehicleData> vehicleDatas = GetAllVehiclesEgerLoad();
-                if (searchString != null && !String.IsNullOrEmpty(searchString))
+                if (searchWord != null && !String.IsNullOrEmpty(searchWord))
                 {
+                    string searchString = searchWord.Trim();
                     _logger.LogInformation($">>>>>>>>>> Get searchAll result VehicleData paginate eger load list. <<<<<<<<<<");
                     try
                     {
@@ -159,7 +160,6 @@ namespace YBOInvestigation.Services.Impl
                         else if (searchOption == "driverName")
                         {
                             List<Driver> drivers = _context.Drivers.Where(driver => driver.DriverName.Contains(searchString)).Include(driver => driver.VehicleData).ToList();
-                            Console.WriteLine("drive count: /////////////" + drivers.Count);
                             if (drivers.Count > 0)
                             {
                                 List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
