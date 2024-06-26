@@ -59,6 +59,44 @@ namespace YBOInvestigation.Services.Impl
             }
         }
 
+        private List<YboRecord> YBORecordsLazyLoad()
+        {
+            return _context.YboRecords.Where(yboRecord => yboRecord.IsDeleted == false).ToList();
+        }
+
+        private List<YboRecord> YBORecordsWithYBSCompany()
+        {
+            return _context.YboRecords.Where(yboRecord => yboRecord.IsDeleted == false).Include(yboRecord => yboRecord.YBSCompany).ToList();
+        }
+
+        private List<YboRecord> YBORecordsWithYBSType()
+        {
+            return _context.YboRecords.Where(yboRecord => yboRecord.IsDeleted == false).Include(yboRecord => yboRecord.YBSType).ToList();
+        }
+
+        private List<YboRecord> YBORecordsWithDriverAndVehicleData()
+        {
+            return _context.YboRecords.Where(yboRecord => yboRecord.IsDeleted == false).Include(yboRecord => yboRecord.Driver).Include(yboRecord => yboRecord.Driver.VehicleData).ToList();
+        }
+
+        private List<YboRecord> SearchResultList(string searchString)
+        {
+            List<YboRecord> resultList = YBORecordsLazyLoad().Where(vehicle => IsSearchDataContained(vehicle, searchString)).AsQueryable().ToList();
+            if (resultList.Count < 1)
+            {
+                resultList = YBORecordsWithYBSCompany().Where(vehicle => IsSearchDataContained(vehicle.YBSCompany, searchString)).AsQueryable().ToList();
+            }
+            if (resultList.Count < 1)
+            {
+                resultList = YBORecordsWithYBSType().Where(vehicle => IsSearchDataContained(vehicle.YBSType, searchString)).AsQueryable().ToList();
+            }
+            if (resultList.Count < 1)
+            {
+                resultList = YBORecordsWithDriverAndVehicleData().Where(vehicle => IsSearchDataContained(vehicle.Driver, searchString) || IsSearchDataContained(vehicle.Driver.VehicleData, searchString)).AsQueryable().ToList();
+            }            
+            return resultList;
+        }
+
         public PagingList<YboRecord> GetAllYboRecordsWithPagin(string searchString, int? pageNo, int PageSize)
         {
             _logger.LogInformation(">>>>>>>>>> [YboServiceImpl][GetAllYboRecordsWithPagin] SearchAll or GetAll YboRecord list and make pagination <<<<<<<<<<");
@@ -71,20 +109,22 @@ namespace YBOInvestigation.Services.Impl
                     try
                     {
                         _logger.LogInformation($">>>>>>>>>> Success. Get searchAll result YboRecord paginate eger load list. <<<<<<<<<<");
-                        resultList = _context.YboRecords
-                    .Where(yboRecord => yboRecord.IsDeleted == false)
-                            .Include(yboRecord => yboRecord.YBSCompany)
-                            .Include(yboRecord => yboRecord.YBSType)
-                            .Include(yboRecord => yboRecord.Driver)
-                            .Include(yboRecord => yboRecord.Driver.VehicleData)
-                            .AsEnumerable()
-                            .Where(yboRecord => IsSearchDataContained(yboRecord, searchString)
-                            || IsSearchDataContained(yboRecord.YBSCompany, searchString)
-                            || IsSearchDataContained(yboRecord.YBSType, searchString)
-                            || IsSearchDataContained(yboRecord.Driver, searchString)
-                            )
-                            .OrderByDescending(yboRecord => yboRecord.CreatedDate)
-                            .ToList();
+                         resultList = _context.YboRecords
+                     .Where(yboRecord => yboRecord.IsDeleted == false)
+                             .Include(yboRecord => yboRecord.YBSCompany)
+                             .Include(yboRecord => yboRecord.YBSType)
+                             .Include(yboRecord => yboRecord.Driver)
+                             .Include(yboRecord => yboRecord.Driver.VehicleData)
+                             .AsEnumerable()
+                             .Where(yboRecord => IsSearchDataContained(yboRecord, searchString)
+                             || IsSearchDataContained(yboRecord.YBSCompany, searchString)
+                             || IsSearchDataContained(yboRecord.YBSType, searchString)
+                             || IsSearchDataContained(yboRecord.Driver, searchString)
+                             || IsSearchDataContained(yboRecord.Driver.VehicleData, searchString)
+                             )
+                             .OrderByDescending(yboRecord => yboRecord.CreatedDate)
+                             .ToList();
+                       // resultList = SearchResultList(searchString);
                     }
                     catch (Exception e)
                     {

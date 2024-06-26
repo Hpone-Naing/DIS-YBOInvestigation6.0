@@ -92,7 +92,7 @@ namespace YBOInvestigation.Services.Impl
                            .Where(callCenterInvestigationDept => IsSearchDataContained(callCenterInvestigationDept, searchString)
                                || IsSearchDataContained(callCenterInvestigationDept.YBSCompany, searchString)
                                || IsSearchDataContained(callCenterInvestigationDept.YBSType, searchString)
-                               || IsSearchDataContained(callCenterInvestigationDept.Driver, searchString))
+                               || IsSearchDataContained(callCenterInvestigationDept.Driver, searchString) || IsSearchDataContained(callCenterInvestigationDept.Driver.VehicleData, searchString))
                            .OrderByDescending(callCenterInvestigationDept => callCenterInvestigationDept.CreatedDate)
                            .ToList();
                     }

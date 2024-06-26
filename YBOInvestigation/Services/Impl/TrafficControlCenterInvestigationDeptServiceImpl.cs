@@ -84,6 +84,7 @@ namespace YBOInvestigation.Services.Impl
                             || IsSearchDataContained(trafficControlCenterInvestigationDept.YBSCompany, searchString)
                             || IsSearchDataContained(trafficControlCenterInvestigationDept.YBSType, searchString)
                             || IsSearchDataContained(trafficControlCenterInvestigationDept.Driver, searchString)
+                            || IsSearchDataContained(trafficControlCenterInvestigationDept.Driver.VehicleData, searchString)
                             || IsSearchDataContained(trafficControlCenterInvestigationDept.PunishmentType, searchString)
                             )
                             .OrderByDescending(trafficControlCenterInvestigationDept => trafficControlCenterInvestigationDept.CreatedDate)

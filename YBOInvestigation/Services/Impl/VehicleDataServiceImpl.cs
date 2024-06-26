@@ -61,7 +61,7 @@ namespace YBOInvestigation.Services.Impl
                         
                         if(searchOption == "idNumber")
                         {
-                            Driver driver = _context.Drivers.Where(driver => driver.IDNumber.Contains(searchString)).Include(driver => driver.VehicleData).FirstOrDefault();
+                            Driver driver = _context.Drivers.Where(driver => driver.IDNumber.Contains(searchString.Trim())).Include(driver => driver.VehicleData).FirstOrDefault();
                             if(driver != null)
                             {
                                 resultList.Add(driver.VehicleData);
@@ -70,7 +70,7 @@ namespace YBOInvestigation.Services.Impl
                         }
                         else if(searchOption == "driverName")
                         {
-                            Driver driver = _context.Drivers.Where(driver => driver.DriverName.Contains(searchString)).Include(driver => driver.VehicleData).FirstOrDefault();
+                            Driver driver = _context.Drivers.Where(driver => driver.DriverName.Contains(searchString.Trim())).Include(driver => driver.VehicleData).FirstOrDefault();
                             if(driver != null)
                             {
                                 resultList.Add(driver.VehicleData);
@@ -85,11 +85,11 @@ namespace YBOInvestigation.Services.Impl
                                 resultList.Add(driver.VehicleData);
 
                             }*/
-                            resultList = _context.Drivers.Where(driver => driver.DriverLicense.Contains(searchString)).Include(driver => driver.VehicleData).Select(driver => driver.VehicleData).ToList();
+                            resultList = _context.Drivers.Where(driver => driver.DriverLicense.Contains(searchString.Trim())).Include(driver => driver.VehicleData).Select(driver => driver.VehicleData).ToList();
                         }
                         else
                         {
-                            resultList = _context.VehicleDatas.Where(vehicle => vehicle.VehicleNumber.Contains(searchString)).ToList();/*vehicleDatas.Where(vehicle => IsSearchDataContained(vehicle, searchString, searchOption) || IsSearchDataContained(vehicle.YBSType, searchString, searchOption))
+                            resultList = _context.VehicleDatas.Where(vehicle => vehicle.VehicleNumber.Contains(searchString.Trim())).ToList();/*vehicleDatas.Where(vehicle => IsSearchDataContained(vehicle, searchString, searchOption) || IsSearchDataContained(vehicle.YBSType, searchString, searchOption))
                             .AsQueryable()
                             .ToList();*/
                         }

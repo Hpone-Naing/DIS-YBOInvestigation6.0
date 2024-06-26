@@ -80,6 +80,9 @@ namespace YBOInvestigation.Services.Impl
                                     .Where(specialEventInvestigationDept => IsSearchDataContained(specialEventInvestigationDept, searchString)
                                     || IsSearchDataContained(specialEventInvestigationDept.YBSCompany, searchString)
                                     || IsSearchDataContained(specialEventInvestigationDept.YBSType, searchString)
+                                    || IsSearchDataContained(specialEventInvestigationDept.YBSType, searchString)
+                                    || IsSearchDataContained(specialEventInvestigationDept.Driver, searchString)
+                                    || IsSearchDataContained(specialEventInvestigationDept.Driver.VehicleData, searchString)
                                     )
                                     .OrderByDescending(specialEventInvestigationDept => specialEventInvestigationDept.CreatedDate)
                                     .ToList();

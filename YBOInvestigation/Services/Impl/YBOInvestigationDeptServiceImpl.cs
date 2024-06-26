@@ -82,6 +82,7 @@ namespace YBOInvestigation.Services.Impl
                             || IsSearchDataContained(yBOInvestigationDept.YBSCompany, searchString)
                             || IsSearchDataContained(yBOInvestigationDept.YBSType, searchString)
                             || IsSearchDataContained(yBOInvestigationDept.Driver, searchString)
+                            || IsSearchDataContained(yBOInvestigationDept.Driver.VehicleData, searchString)
                             || IsSearchDataContained(yBOInvestigationDept.PunishmentType, searchString)
                             )
                             .OrderByDescending(yboInvestigationDept => yboInvestigationDept.CreatedDate)
