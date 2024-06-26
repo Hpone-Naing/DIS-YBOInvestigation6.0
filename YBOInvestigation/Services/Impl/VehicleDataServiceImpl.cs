@@ -125,6 +125,21 @@ namespace YBOInvestigation.Services.Impl
             }
         }
 
+        private PagingList<DriverPunishmentInfo> MakeDriverPunishmentInfoList(int? pageNo, int PageSize, List<Driver> drivers)
+        {
+            List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
+            foreach (Driver driver in drivers)
+            {
+                DriverPunishmentInfo driverPunishmentInfo = new DriverPunishmentInfo()
+                {
+                    VehicleData = driver.VehicleData,
+                    Driver = driver
+                };
+                driverPunishmentInfos.Add(driverPunishmentInfo);
+            }
+            return PagingList<DriverPunishmentInfo>.CreateAsync(driverPunishmentInfos.AsQueryable(), pageNo ?? 1, PageSize);
+        }
+
         public PagingList<DriverPunishmentInfo> GetAllDriverPunishmentInfoWithPagin(string searchWord, AdvanceSearch advanceSearch, int? pageNo, int PageSize, string searchOption = null)
         {
             _logger.LogInformation(">>>>>>>>>> [VehicleDataServiceImpl][GetAllVehiclesWithPagin] SearchAll or GetAll VehicleData paginate eger load list. <<<<<<<<<<");
@@ -144,7 +159,7 @@ namespace YBOInvestigation.Services.Impl
                             List<Driver> drivers = _context.Drivers.Where(driver => driver.IDNumber == searchString).Include(driver => driver.VehicleData).ToList();
                             if (drivers.Count > 0)
                             {
-                                List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
+                                /*List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
                                 foreach(Driver driver in drivers)
                                 {
                                     DriverPunishmentInfo driverPunishmentInfo = new DriverPunishmentInfo()
@@ -154,7 +169,8 @@ namespace YBOInvestigation.Services.Impl
                                     };
                                     driverPunishmentInfos.Add(driverPunishmentInfo);
                                 }
-                                return PagingList<DriverPunishmentInfo>.CreateAsync(driverPunishmentInfos.AsQueryable(), pageNo ?? 1, PageSize);
+                                return PagingList<DriverPunishmentInfo>.CreateAsync(driverPunishmentInfos.AsQueryable(), pageNo ?? 1, PageSize);*/
+                                return MakeDriverPunishmentInfoList(pageNo ?? 1, PageSize, drivers);
                             }
                         }
                         else if (searchOption == "driverName")
@@ -162,7 +178,7 @@ namespace YBOInvestigation.Services.Impl
                             List<Driver> drivers = _context.Drivers.Where(driver => driver.DriverName.Contains(searchString)).Include(driver => driver.VehicleData).ToList();
                             if (drivers.Count > 0)
                             {
-                                List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
+                                /*List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
                                 foreach (Driver driver in drivers)
                                 {
                                     Console.WriteLine("DName / license" + driver.DriverName + " / " + driver.DriverLicense);
@@ -174,15 +190,16 @@ namespace YBOInvestigation.Services.Impl
                                     driverPunishmentInfos.Add(driverPunishmentInfo);
                                 }
                                 return PagingList<DriverPunishmentInfo>.CreateAsync(driverPunishmentInfos.AsQueryable(), pageNo ?? 1, PageSize);
-
+                                */
+                                return MakeDriverPunishmentInfoList(pageNo ?? 1, PageSize, drivers);
                             }
                         }
                         else if (searchOption == "licenseNumber")
                         {
-                            List<Driver> drivers = _context.Drivers.Where(driver => driver.DriverLicense == searchString).ToList();
+                            List<Driver> drivers = _context.Drivers.Where(driver => driver.DriverLicense.Contains(searchString)).Include(driver => driver.VehicleData).ToList();
                             if (drivers.Count > 0)
                             {
-                                List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
+                                /*List<DriverPunishmentInfo> driverPunishmentInfos = new List<DriverPunishmentInfo>();
                                 foreach (Driver driver in drivers)
                                 {
                                     DriverPunishmentInfo driverPunishmentInfo = new DriverPunishmentInfo()
@@ -192,8 +209,8 @@ namespace YBOInvestigation.Services.Impl
                                     };
                                     driverPunishmentInfos.Add(driverPunishmentInfo);
                                 }
-                                return PagingList<DriverPunishmentInfo>.CreateAsync(driverPunishmentInfos.AsQueryable(), pageNo ?? 1, PageSize);
-
+                                return PagingList<DriverPunishmentInfo>.CreateAsync(driverPunishmentInfos.AsQueryable(), pageNo ?? 1, PageSize);*/
+                                return MakeDriverPunishmentInfoList(pageNo ?? 1, PageSize, drivers);
                             }
                         }
                         else
